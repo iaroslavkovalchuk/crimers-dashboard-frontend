@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom"
 import { usePassword } from "../hooks/usePassword"
 
 export const Signin = () => {
@@ -60,7 +61,9 @@ export const Signin = () => {
 
         <div className="flex justify-center gap-2 mt-5">
             <p className="text-red-400 text-sm">Don't have an account?</p>
-            <p className="text-red-400 text-sm font-semibold cursor-pointer">Create</p>
+            <p className="text-red-400 text-sm font-semibold cursor-pointer">
+              <Link to="/signup">Create</Link>
+            </p>
         </div>
       </div>
     </div>
