@@ -6,7 +6,7 @@ export const Signup = () => {
   const [showConfirmPassword, showConfirmPass, hideConfirmPass] = usePassword()
 
   return (
-    <div className="w-[100%] h-[100vh] flex flex-col gap-6 justify-center items-center bg-cover bg-[url('https://w0.peakpx.com/wallpaper/250/790/HD-wallpaper-stoneage-house-old-home-side-of-hill-dark-sky.jpg')]">
+    <div className="w-[100%] h-[100vh] flex flex-col gap-6 justify-center items-center bg-cover bg-[url('/bg.png')]">
       <div className="w-96">
         <img src="https://delmar-react-tailwind.vercel.app/static/media/logo.9f804465c04a053b763ff5493042c6f5.svg" alt="logo" 
           className="w-[100%] h-[100%]"
