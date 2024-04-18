@@ -1,8 +1,47 @@
-import { Link } from "react-router-dom"
+import { Link, useNavigate } from "react-router-dom"
 import { usePassword } from "../hooks/usePassword"
+import { useState } from "react"
+import { useDispatch } from "react-redux"
+import { loadingOff, loadingOn } from "../store/authSlice"
+import { signinUser } from "../services/auth"
 
 export const Signin = () => {
   const [showPassword, showPass, hidePass] = usePassword()
+  const [userInfo, setUserInfo] = useState({
+    email: '',
+    password: '',
+  })
+
+  const dispatch = useDispatch()
+  const navigate = useNavigate()
+
+  const handleChange = (e) => {
+    const name = e.target.name;
+    const value = e.target.value;
+    setUserInfo({
+      ...userInfo,
+      [name]: value
+    })
+  }
+
+  const handleSignin = async () => {
+    if (!userInfo.email || !userInfo.password) {
+      alert('Signin fields cannot be empty!');
+      return;
+    }
+    dispatch(loadingOn())
+    const res = await signinUser({...userInfo})
+
+    dispatch(loadingOff())
+    if (res['detail']) {
+      alert(res.detail);
+      return;
+    }
+    if (res['access_token']) {
+      localStorage.setItem('access_token', res.access_token)
+      navigate('/notifications')
+    }
+  }
 
   return (
     <div className="w-[100%] h-[100vh] flex flex-col gap-6 justify-center items-center bg-cover bg-[url('/bg.png')]">
@@ -22,7 +61,9 @@ export const Signin = () => {
                 className="w-[100%] h-[100%]"
               />
             </div>
-            <input placeholder="E-mail" className="p-2 border-none w-[100%] placeholder:text-red-400 focus:outline-none" />
+            <input placeholder="E-mail" className="p-2 border-none w-[100%] placeholder:text-red-400 focus:outline-none" 
+              name="email" onChange={handleChange} value={userInfo.email}
+            />
           </div>
 
           <div className="shadow-md rounded-2xl p-2 bg-white flex items-center">
@@ -31,7 +72,9 @@ export const Signin = () => {
                 className="w-[100%] h-[100%]"
               />
             </div>
-            <input placeholder="Password" type={showPassword ? "password": "text"} className="p-2 border-none w-[100%] placeholder:text-red-400 focus:outline-none" />
+            <input placeholder="Password" type={showPassword ? "password": "text"} className="p-2 border-none w-[100%] placeholder:text-red-400 focus:outline-none" 
+              name="password" onChange={handleChange} value={userInfo.password}
+            />
             <div className="w-10">
               { showPassword ? <img src="https://delmar-react-tailwind.vercel.app/static/media/eye-lock.d107eb1ce1b5084858dc197fcebf2cf4.svg" alt="image" 
                 className="w-[100%] h-[100%] cursor-pointer"  onClick={hidePass}
@@ -54,7 +97,7 @@ export const Signin = () => {
         </div>
 
         <div className="w-[50%] mx-auto mt-6">
-          <button className="w-[100%] p-2 bg-red-600 rounded-3xl text-white font-semibold shadow-lg">
+          <button className="w-[100%] p-2 bg-red-600 rounded-3xl text-white font-semibold shadow-lg" onClick={handleSignin}>
             SIGN IN
           </button>
         </div>
