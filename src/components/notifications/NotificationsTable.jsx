@@ -35,8 +35,6 @@ export const NotificationsTable = () => {
         }
     }
 
-    console.log(data)
-
     return (
         <div>
             <div className="w-[400px] pl-8 pt-8">
