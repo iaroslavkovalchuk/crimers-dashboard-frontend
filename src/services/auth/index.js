@@ -34,3 +34,37 @@ export const signinUser = async ({email, password}) => {
         console.log(error)
     }
 }
+
+
+export const changePassword = async ({token, email, newPassword}) => {
+    try {
+        const formData = new FormData()
+        formData.append('token', token)
+        formData.append('email', email)
+        formData.append('new_password', newPassword)
+
+        const res = await fetch(API+'change-password', {
+            method: 'POST',
+            body: formData
+        })
+        const json = await res.json();
+        return json;
+    } catch (error) {
+        console.log(error)
+    }
+}
+export const confirmEmail = async ({email}) => {
+    try {
+        const formData = new FormData()
+        formData.append('email', email)
+
+        const res = await fetch(API+'confirm-email', {
+            method: 'POST',
+            body: formData
+        })
+        const json = await res.json();
+        return json;
+    } catch (error) {
+        console.log(error)
+    }
+}

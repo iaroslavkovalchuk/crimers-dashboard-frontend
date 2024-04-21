@@ -3,6 +3,7 @@ import { Signin } from './pages/Signin'
 import { Signup } from './pages/Signup'
 import { Notifications } from './pages/Notifications'
 import { Layout } from './pages/Layout'
+import { ForgotPassword } from './pages/ForgotPassword'
 
 const router = createBrowserRouter([
   {
@@ -16,6 +17,10 @@ const router = createBrowserRouter([
       {
         path: '/signup',
         element: <Signup />
+      },
+      {
+        path: '/forgot-password/:forgotPasswordToken?',
+        element: <ForgotPassword />
       },
       {
         path: '/notifications',

@@ -38,9 +38,17 @@ export const Signin = () => {
       return;
     }
     if (res['access_token']) {
+      alert("You signed in successfully");
       localStorage.setItem('access_token', res.access_token)
       navigate('/notifications')
     }
+    else{
+      alert("Email or Password are incorrect!");
+    }
+  }
+
+  const handleForgotPassword = async() => {
+      navigate('/forgot-password');
   }
 
   return (
@@ -92,7 +100,7 @@ export const Signin = () => {
             <p className="text-red-400 text-sm">Remember me</p>
           </div>
           <div>
-            <p className="text-red-400 text-sm cursor-pointer">Forgot password?</p>
+            <p className="text-red-400 text-sm cursor-pointer" onClick={handleForgotPassword}>Forgot password?</p>
           </div>
         </div>
 
