@@ -1,10 +1,9 @@
 import { useState, useEffect } from 'react'
 import { TbPlus, TbMinus } from "react-icons/tb";
 import { IoMdRefresh } from "react-icons/io";
-import { BsFillPencilFill } from "react-icons/bs";
-import { FiDownload } from "react-icons/fi";
-import { AiFillDelete, AiOutlineMinusCircle, AiFillLike } from "react-icons/ai";
-import { LuMessagesSquare } from "react-icons/lu";
+import { FiDownload, FiMinusCircle } from "react-icons/fi";
+import { AiFillDelete, AiFillLike } from "react-icons/ai";
+import { LuMessagesSquare, LuPencil } from "react-icons/lu";
 import { IoCloseSharp } from "react-icons/io5";
 import { BsCheckLg } from "react-icons/bs";
 import {getNotifications, setQued, cancelQued, setSent, updateLastMessage, downloadProjectMessage, downloadCustomerMessage, changeCustomerStatus, deleteCustomer} from '../../services/notifications'
@@ -15,23 +14,24 @@ import { setData } from '../../store/notificationSlice';
 import { loadingOff, loadingOn } from '../../store/authSlice';
 import logo from "../../assets/logo.svg"
 import { useNavigate } from 'react-router-dom';
+import { EditMessageModal } from '../common/EditMessageModal';
 
 export const NotificationsTable = () => {
     const [expandId, setExpandId] = useState(null)
     const data = useSelector(state => state.notification.data)
+    const [editMessage, setEditMessage] = useState('')
+    const [turnOnEdit, setTurnOnEdit] = useState(null)
+    const [refetch, setRefetch] = useState(false);
     const dispatch = useDispatch()
     
     const [remainTime, setRemainTime] = useState([]);
     const navigate = useNavigate()
 
-    // let remainTime = [];
-
     useEffect(() => {
         fetchData()
-    }, [])
+    }, [refetch])
 
     useEffect(() => {
-        
         const interval = setInterval(() => {
             const now = Date.now();
             setRemainTime(data?.map((item) => {
@@ -78,6 +78,12 @@ export const NotificationsTable = () => {
             }
         }
     }
+
+    const handleCancelMessage = async () => {
+        setEditMessage('');
+        setTurnOnEdit(null)
+    }
+
     const handlerDownloadProject = async (project_id) => {
         await downloadProjectMessage(project_id)
     }
@@ -85,24 +91,54 @@ export const NotificationsTable = () => {
         await downloadCustomerMessage(customer_id)
     }
     const handlerSetQued = async (project_id) => {
+        dispatch(loadingOn())
         await setQued(project_id)
+        dispatch(loadingOff())
+        setRefetch(!refetch)
     }
     const handlerCancelQued = async (project_id) => {
+        dispatch(loadingOn())
         await cancelQued(project_id)
+        dispatch(loadingOff())
+        setRefetch(!refetch)
     }
     const handlerSetSent = async (project_id) => {
+        dispatch(loadingOn())
         await setSent(project_id)
+        dispatch(loadingOff())
+        setRefetch(!refetch)
     }
-    const handlerUpdateLastMessage = async (project_id, message) => {
-        await updateLastMessage(project_id, message)
+    const handlerUpdateLastMessage = async (message) => {
+        if (!turnOnEdit) return;
+
+        dispatch(loadingOn())
+        await updateLastMessage(turnOnEdit, message)
+        dispatch(loadingOff())
+        setEditMessage('')
+        setTurnOnEdit(null)
+        setRefetch(!refetch)
     }
-    const handlerChangeCustomerStatus = async (project_id, method) => {
+    const handlerChangeCustomerStatus = async (customer_id, method) => {
         alert(method);
+        dispatch(loadingOn())
         await changeCustomerStatus(customer_id, method)
+        dispatch(loadingOff())
+        setRefetch(!refetch)
     }
-    const handleDeleteCustomer = async (project_id) => {
+    const handleDeleteCustomer = async (customer_id) => {
+        dispatch(loadingOn())
         await deleteCustomer(customer_id)
+        dispatch(loadingOff())
+        setRefetch(!refetch)
     }
+
+    const handleDeleteMessage = async (projectId) => {
+        dispatch(loadingOn())
+        await updateLastMessage(projectId, '')
+        dispatch(loadingOff())
+        setRefetch(!refetch)
+    }
+
     return (
         <div>
             <div className="w-[400px] pl-8 pt-8">
@@ -121,18 +157,18 @@ export const NotificationsTable = () => {
                         <thead className=" bg-red-700">
                             <tr>
                                 <th className="w-[5%]"/>
-                                <th className="w-[10%] text-left p-2 text-lg text-white">Send On</th>
-                                <th className="w-[10%] text-white text-lg text-left">Last Name</th>
-                                <th className="w-[10%] text-white text-lg text-left">First Name</th>
-                                <th className="w-[12%] text-white text-lg text-left">Claim</th>
-                                <th className="w-[12%] text-white text-lg text-left">Status</th>
-                                <th className="w-[41%] text-white text-lg text-left">Message</th>
+                                <th className="w-[10%] text-center p-2 text-lg text-white">Send On</th>
+                                <th className="w-[10%] text-white text-lg text-center">Last Name</th>
+                                <th className="w-[10%] text-white text-lg text-center">First Name</th>
+                                <th className="w-[12%] text-white text-lg text-center">Claim</th>
+                                <th className="w-[12%] text-white text-lg text-center">Status</th>
+                                <th className="w-[41%] text-white text-lg text-center">Message</th>
                             </tr>
                         </thead>
                         
                         <tbody className="bg-white">
                             {data?.map((item, dataIndex) => {
-                                let status = '';
+                                let status = 'REVIEW';
                                 if (item.message_status === 1) {
                                     status = 'REVIEW'
                                 }else if (item.message_status === 2) {
@@ -140,6 +176,7 @@ export const NotificationsTable = () => {
                                 }else if (item.message_status === 3) {
                                     status = 'SENT'
                                 }
+                                
                                 return (
                                     <>
                                         <tr key={item.customer_id} className={`${expandId === item.customer_id ? "bg-red-700": "bg-gray-400"} border-t-2 border-t-white `}>
@@ -147,10 +184,10 @@ export const NotificationsTable = () => {
                                                 {expandId === item.customer_id ? <TbMinus className="text-3xl text-white font-bold cursor-pointer" onClick={() => setExpandId(null)}/> : 
                                                     <TbPlus className="text-3xl text-white font-bold cursor-pointer" onClick={() => setExpandId(item.customer_id)}/> }
                                             </td>
-                                            <td className="text-lg font-semibold text-white">{!(expandId === item.customer_id) && (item.sent_timestamp ? moment(item.sent_timestamp).format(DATE_FORMAT) : '-')}</td>
-                                            <td className="text-lg font-semibold text-white">{!(expandId === item.customer_id)  && item.lastname}</td>
-                                            <td className="text-lg font-semibold text-white">{!(expandId === item.customer_id)  && item.firstname}</td>
-                                            <td className="text-lg font-semibold text-white">{!(expandId === item.customer_id)  && item.claim_number}</td>
+                                            <td className="text-lg font-semibold text-white text-center">{!(expandId === item.customer_id) && (item.sent_timestamp ? moment(item.sent_timestamp).format(DATE_FORMAT) : '-')}</td>
+                                            <td className="text-lg font-semibold text-white text-center">{!(expandId === item.customer_id)  && item.lastname}</td>
+                                            <td className="text-lg font-semibold text-white text-center">{!(expandId === item.customer_id)  && item.firstname}</td>
+                                            <td className="text-lg font-semibold text-white text-center">{!(expandId === item.customer_id)  && item.claim_number}</td>
                                             <td className="text-lg font-semibold text-white text-center">{!(expandId === item.customer_id)  && status}</td>
                                             <td>
                                                 <div className='flex items-center justify-between'>
@@ -160,16 +197,19 @@ export const NotificationsTable = () => {
                                                     <div className="flex justify-end mr-3 gap-3 items-center">
                                                         <LuMessagesSquare className="text-3xl text-white" />
                                                         {/* <IoMdRefresh className={`text-3xl ${expandId === item.project_id? 'text-green-500': 'text-white'}`} /> */}
-                                                        {item.sending_method == 1 ? (<IoMdRefresh className="text-3xl text-white" onClick={() => handlerChangeCustomerStatus(item.customer_id, 1)}/>) : (<IoMdRefresh className="text-3xl text-white" onClick={() => handlerChangeCustomerStatus(item.customer_id, 2)}/>)}
+                                                        {item.sending_method == 2 ? (<IoMdRefresh className="text-3xl text-green-500 cursor-pointer" onClick={() => handlerChangeCustomerStatus(item.customer_id, 1)}/>) : (
+                                                            <IoMdRefresh className="text-3xl text-white cursor-pointer" onClick={() => handlerChangeCustomerStatus(item.customer_id, 2)}/>)}
                                                         <FiDownload className="text-3xl text-white"  onClick={() => handlerDownloadCustomer(item.customer_id)}/>
-                                                        <IoCloseSharp className="text-3xl text-white" />
+                                                        <IoCloseSharp className="text-3xl text-white cursor-pointer"  onClick={() => {
+                                                            handleDeleteCustomer(item.customer_id)
+                                                        }}/>
                                                     </div>
                                                 </div>
                                             </td>
                                         </tr>
 
                                         {expandId === item.customer_id && item.data.map((childData, childIndex) => {
-                                            let childStatus = '';
+                                            let childStatus = 'REVIEW';
                                             if (childData.message_status === 1) {
                                                 childStatus = 'REVIEW'
                                             }else if (childData.message_status === 2) {
@@ -177,6 +217,7 @@ export const NotificationsTable = () => {
                                             }else if (childData.message_status === 3) {
                                                 childStatus = 'SENT'
                                             }
+                                            
                                             return (
                                                 <tr key={childData.project_id} className={`bg-white border-t-2 border-t-gray-300`}>
                                                     <td />
@@ -194,12 +235,45 @@ export const NotificationsTable = () => {
                                                         <div className="flex justify-between mr-3 gap-3 items-center">
                                                         
                                                             <p className="text-lg font-semibold text-orange-900">{childData.last_message ? childData.last_message.slice(0, 50) + '...' : ''}</p>
+                                                            
                                                             <div className="flex gap-3 items-center">
                                                                 {/* {childIndex} */}
                                                                 <p>{(childStatus === "QUED") && remainTime[dataIndex][childIndex]}</p> 
-                                                                <BsCheckLg className="text-3xl text-gray-400" />
-                                                                <FiDownload className="text-3xl" onClick={() => handlerDownloadProject(childData.project_id)}/>
-                                                                <AiOutlineMinusCircle className="text-3xl text-red-500" /> 
+                                                                <LuPencil className="text-2xl text-gray-400 cursor-pointer" 
+                                                                    onClick={() => {
+                                                                        setTurnOnEdit(childData.project_id)
+                                                                        setEditMessage(childData.last_message || '')
+                                                                    }}
+                                                                />
+                                                                { childStatus === 'REVIEW' && <BsCheckLg className="text-3xl text-gray-400 cursor-pointer" 
+                                                                    onClick={() => handlerSetQued(childData.project_id)}
+                                                                /> }
+                                                                { childStatus === 'QUED' && (
+                                                                    <div className='flex cursor-pointer'>
+                                                                        <BsCheckLg className="text-3xl text-gray-400 cursor-pointer" />
+                                                                        <BsCheckLg className="text-3xl text-green-500 cursor-pointer -ml-4" />
+                                                                    </div>
+                                                                )}
+                                                                { childStatus === 'SENT' && (
+                                                                    <div className='flex cursor-pointer'>
+                                                                        <BsCheckLg className="text-3xl text-green-500 cursor-pointer" />
+                                                                        <BsCheckLg className="text-3xl text-green-500 cursor-pointer -ml-4" />
+                                                                    </div>
+                                                                )}
+                                                                { childStatus === 'QUED' && <FiMinusCircle className='text-2xl cursor-pointer text-red-500' 
+                                                                    onClick={() => handlerCancelQued(childData.project_id) }
+                                                                />}
+                                                                <FiDownload className="text-3xl cursor-pointer" onClick={() => handlerDownloadProject(childData.project_id)}/>
+
+                                                                { childStatus === 'REVIEW' && <AiFillDelete className="text-3xl text-red-500 cursor-pointer"
+                                                                    onClick={() => {
+                                                                        const res = confirm('Are you really sure to delete the message?')
+                                                                        if (res) {
+                                                                            handleDeleteMessage(childData.project_id)
+                                                                        }
+                                                                    }}
+                                                                /> }
+                                                                { childStatus === 'SENT' && <AiFillLike className="text-2xl cursor-pointer"/> }
                                                             </div>
                                                         </div>
                                                     </td>
@@ -211,6 +285,7 @@ export const NotificationsTable = () => {
                             })}
                         </tbody>
                     </table>
+                    { turnOnEdit && <EditMessageModal message={editMessage} onSave={handlerUpdateLastMessage} onCancel={handleCancelMessage} /> }
                 </div>
             </div>
         </div>
