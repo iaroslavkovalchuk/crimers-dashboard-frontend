@@ -10,6 +10,10 @@ export const getNotifications = async () => {
             }
         })
         const json = await res.json();
+        console.log({json})
+        if (json.detail === "Could not validate credentials") {
+            localStorage.removeItem('access_token')
+        }
         return json;
     } catch (error) {
         console.log(error)

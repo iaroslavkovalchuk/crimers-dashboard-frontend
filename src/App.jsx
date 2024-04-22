@@ -4,6 +4,7 @@ import { Signup } from './pages/Signup'
 import { Notifications } from './pages/Notifications'
 import { Layout } from './pages/Layout'
 import { ForgotPassword } from './pages/ForgotPassword'
+import { PrivateRouter } from './pages/PrivateRouter'
 
 const router = createBrowserRouter([
   {
@@ -24,7 +25,7 @@ const router = createBrowserRouter([
       },
       {
         path: '/notifications',
-        element: <Notifications />
+        element: <PrivateRouter><Notifications /></PrivateRouter>
       }
     ]
   }

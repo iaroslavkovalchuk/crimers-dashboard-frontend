@@ -14,13 +14,15 @@ import { useDispatch, useSelector } from 'react-redux';
 import { setData } from '../../store/notificationSlice';
 import { loadingOff, loadingOn } from '../../store/authSlice';
 import logo from "../../assets/logo.svg"
+import { useNavigate } from 'react-router-dom';
 
 export const NotificationsTable = () => {
     const [expandId, setExpandId] = useState(null)
     const data = useSelector(state => state.notification.data)
     const dispatch = useDispatch()
-
+    
     const [remainTime, setRemainTime] = useState([]);
+    const navigate = useNavigate()
 
     // let remainTime = [];
 
@@ -64,6 +66,11 @@ export const NotificationsTable = () => {
         dispatch(loadingOn())
         const res = await getNotifications();
         dispatch(loadingOff())
+
+        if (res.detail === "Could not validate credentials") {
+            alert('Unauthorized user!');
+            navigate('/signup')
+        }
         
         if (res) {
             if (Array.isArray(res)) {
