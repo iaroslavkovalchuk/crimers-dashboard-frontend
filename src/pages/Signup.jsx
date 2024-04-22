@@ -8,7 +8,7 @@ import logo from "../assets/logo.svg"
 import mailPNG from "../assets/email.svg"
 import eyePNG from "../assets/eye.svg"
 import showPNG from "../assets/show.svg"
-import lockPNG from "../assets/lock.png"
+import lockSvg from "../assets/lock.svg"
 
 export const Signup = () => {
   const [showPassword, showPass, hidePass] = usePassword()
@@ -61,11 +61,11 @@ export const Signup = () => {
         <p className="font-[500] text-3xl text-center">Sign Up</p>
 
         <div className="mt-4 flex flex-col gap-6">
-            <div className="shadow-md rounded-2xl p-2 bg-white flex items-center">
-                <div className="w-7">
-                <img src={mailPNG} alt="image" 
-                    className="w-[100%] h-[100%]"
-                />
+            <div className="shadow-md rounded-2xl p-2 bg-white flex items-center gap-2">
+                <div className="w-7 ml-2">
+                  <img src={mailPNG} alt="image" 
+                      className="w-[100%] h-[100%]"
+                  />
                 </div>
                 <input placeholder="E-mail" className="p-2 border-none w-[100%] placeholder:text-red-400 focus:outline-none" 
                   name='email' onChange={handleChange} value={userInfo.email}
@@ -74,9 +74,9 @@ export const Signup = () => {
 
             <div className="shadow-md rounded-2xl p-2 bg-white flex items-center">
                 <div className="w-12">
-                <img src={lockPNG} alt="image" 
-                    className="w-[100%] h-[100%]"
-                />
+                  <img src={lockSvg} alt="image" 
+                      className="w-[100%] h-[100%]"
+                  />
                 </div>
                 <input placeholder="Password" type={showPassword ? "password": "text"} className="p-2 border-none w-[100%] placeholder:text-red-400 focus:outline-none" 
                   name='password' onChange={handleChange} value={userInfo.password}
@@ -93,7 +93,7 @@ export const Signup = () => {
 
             <div className="shadow-md rounded-2xl p-2 bg-white flex items-center">
                 <div className="w-12">
-                    <img src="https://delmar-react-tailwind.vercel.app/static/media/password.0baf6a7cbb9d864baf542676971cdaa9.svg" alt="image" 
+                    <img src={lockSvg} alt="image" 
                         className="w-[100%] h-[100%]"
                     />
                 </div>

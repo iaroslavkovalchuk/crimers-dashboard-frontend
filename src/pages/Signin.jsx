@@ -8,7 +8,7 @@ import logo from "../assets/logo.svg"
 import mailPNG from "../assets/email.svg"
 import eyePNG from "../assets/eye.svg"
 import showPNG from "../assets/show.svg"
-import lockPNG from "../assets/lock.png"
+import lockSvg from "../assets/lock.svg"
 
 export const Signin = () => {
   const [showPassword, showPass, hidePass] = usePassword()
@@ -68,8 +68,8 @@ export const Signin = () => {
         <p className="font-[500] text-3xl text-center">Sign In</p>
 
         <div className="mt-4 flex flex-col gap-6">
-          <div className="shadow-md rounded-2xl p-2 bg-white flex items-center">
-            <div className="w-7">
+          <div className="shadow-md rounded-2xl p-2 bg-white flex items-center gap-2">
+            <div className="w-7 ml-2">
               <img src={mailPNG} alt="image" 
                 className="w-[100%] h-[100%]"
               />
@@ -81,7 +81,7 @@ export const Signin = () => {
 
           <div className="shadow-md rounded-2xl p-2 bg-white flex items-center">
             <div className="w-12">
-              <img src={lockPNG} alt="image" 
+              <img src={lockSvg} alt="image" 
                 className="w-[100%] h-[100%]"
               />
             </div>
