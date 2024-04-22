@@ -14,15 +14,15 @@ const notificationSlice = createSlice({
                 if(!obj[item.customer_id]) {
                     obj[item.customer_id] = {
                         ...item,
-                        data: []
+                        data: [item]
                     }
                 } else {
                     const itemData = obj[item.customer_id];
                     itemData.data.push(item);
                 }
             })
-            
             state.data = Object.values(obj) || [];
+            // console.log(obj);
         }
     }
 })

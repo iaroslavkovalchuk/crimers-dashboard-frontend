@@ -7,21 +7,58 @@ import { AiFillDelete, AiOutlineMinusCircle, AiFillLike } from "react-icons/ai";
 import { LuMessagesSquare } from "react-icons/lu";
 import { IoCloseSharp } from "react-icons/io5";
 import { BsCheckLg } from "react-icons/bs";
-import {getNotifications} from '../../services/notifications'
+import {getNotifications, setQued, cancelQued, setSent, updateLastMessage, downloadProjectMessage, downloadCustomerMessage, changeCustomerStatus, deleteCustomer} from '../../services/notifications'
 import moment from 'moment';
 import { DATE_FORMAT } from '../../constants';
 import { useDispatch, useSelector } from 'react-redux';
 import { setData } from '../../store/notificationSlice';
 import { loadingOff, loadingOn } from '../../store/authSlice';
+import logo from "../../assets/logo.svg"
 
 export const NotificationsTable = () => {
     const [expandId, setExpandId] = useState(null)
     const data = useSelector(state => state.notification.data)
     const dispatch = useDispatch()
 
+    const [remainTime, setRemainTime] = useState([]);
+
+    // let remainTime = [];
+
     useEffect(() => {
         fetchData()
     }, [])
+
+    useEffect(() => {
+        
+        const interval = setInterval(() => {
+            const now = Date.now();
+            setRemainTime(data?.map((item) => {
+                return item.data?.map((childData) => {
+                    const qued_time = new Date(childData.qued_timestamp)
+                    qued_time.setMinutes(qued_time.getMinutes() + 5);
+                    // console.log(now - qued_time.getTime());
+                    const difference = qued_time.getTime() - now;
+                    const durationDate = new Date(difference);
+
+                    // Format the duration as a UTC time string (ignoring the date part)
+                    const timeString = durationDate.toISOString().substr(11, 8); // "HH:mm:ss" format
+
+                    // Extract minutes and seconds
+                    const minutes = timeString.substr(3, 2);
+                    const seconds = timeString.substr(6, 2);
+
+                    // Return the time difference as a string in the format "M:S"
+                    return `${parseInt(minutes, 10)}:${seconds}`;
+                })
+            }));
+        }, 1000); // This will run every second
+        
+        // Clean up function
+        return () => {
+            clearInterval(interval);
+        };
+      
+    }, [data, remainTime])
 
     const fetchData = async () => {
         dispatch(loadingOn())
@@ -34,11 +71,35 @@ export const NotificationsTable = () => {
             }
         }
     }
-
+    const handlerDownloadProject = async (project_id) => {
+        await downloadProjectMessage(project_id)
+    }
+    const handlerDownloadCustomer = async (customer_id) => {
+        await downloadCustomerMessage(customer_id)
+    }
+    const handlerSetQued = async (project_id) => {
+        await setQued(project_id)
+    }
+    const handlerCancelQued = async (project_id) => {
+        await cancelQued(project_id)
+    }
+    const handlerSetSent = async (project_id) => {
+        await setSent(project_id)
+    }
+    const handlerUpdateLastMessage = async (project_id, message) => {
+        await updateLastMessage(project_id, message)
+    }
+    const handlerChangeCustomerStatus = async (project_id, method) => {
+        alert(method);
+        await changeCustomerStatus(customer_id, method)
+    }
+    const handleDeleteCustomer = async (project_id) => {
+        await deleteCustomer(customer_id)
+    }
     return (
         <div>
             <div className="w-[400px] pl-8 pt-8">
-                <img src="https://delmar-react-tailwind.vercel.app/static/media/logo.9f804465c04a053b763ff5493042c6f5.svg" alt="logo" 
+                <img src={logo} alt="logo" 
                     className="w-[100%] h-[100%]"
                 />
             </div>
@@ -63,7 +124,7 @@ export const NotificationsTable = () => {
                         </thead>
                         
                         <tbody className="bg-white">
-                            {data?.map((item) => {
+                            {data?.map((item, dataIndex) => {
                                 let status = '';
                                 if (item.message_status === 1) {
                                     status = 'REVIEW'
@@ -74,40 +135,39 @@ export const NotificationsTable = () => {
                                 }
                                 return (
                                     <>
-                                        <tr key={item.project_id} className={`${expandId === item.project_id ? "bg-red-700": "bg-gray-400"} border-t-2 border-t-white `}>
+                                        <tr key={item.customer_id} className={`${expandId === item.customer_id ? "bg-red-700": "bg-gray-400"} border-t-2 border-t-white `}>
                                             <td className="text-center p-2">
-                                                {expandId === item.project_id ? <TbMinus className="text-3xl text-white font-bold cursor-pointer" onClick={() => setExpandId(null)}/> : 
-                                                    <TbPlus className="text-3xl text-white font-bold cursor-pointer" onClick={() => setExpandId(item.project_id)}/> }
+                                                {expandId === item.customer_id ? <TbMinus className="text-3xl text-white font-bold cursor-pointer" onClick={() => setExpandId(null)}/> : 
+                                                    <TbPlus className="text-3xl text-white font-bold cursor-pointer" onClick={() => setExpandId(item.customer_id)}/> }
                                             </td>
-                                            <td className="text-lg font-semibold text-white">{item.sent_timestamp ? moment(item.sent_timestamp).format(DATE_FORMAT) : '-'}</td>
-                                            <td className="text-lg font-semibold text-white">{item.lastname}</td>
-                                            <td className="text-lg font-semibold text-white">{item.firstname}</td>
-                                            <td className="text-lg font-semibold text-white">{item.claim_number}</td>
-                                            <td className="text-lg font-semibold text-white text-center">{status}</td>
+                                            <td className="text-lg font-semibold text-white">{!(expandId === item.customer_id) && (item.sent_timestamp ? moment(item.sent_timestamp).format(DATE_FORMAT) : '-')}</td>
+                                            <td className="text-lg font-semibold text-white">{!(expandId === item.customer_id)  && item.lastname}</td>
+                                            <td className="text-lg font-semibold text-white">{!(expandId === item.customer_id)  && item.firstname}</td>
+                                            <td className="text-lg font-semibold text-white">{!(expandId === item.customer_id)  && item.claim_number}</td>
+                                            <td className="text-lg font-semibold text-white text-center">{!(expandId === item.customer_id)  && status}</td>
                                             <td>
                                                 <div className='flex items-center justify-between'>
                                                     <div>
                                                         <p className="text-lg font-semibold text-white">{}</p>
                                                     </div>
                                                     <div className="flex justify-end mr-3 gap-3 items-center">
-                                                        {expandId === item.project_id && <LuMessagesSquare className="text-3xl text-white" />}
-                                                        <IoMdRefresh className={`text-3xl ${expandId === item.project_id? 'text-green-500': 'text-white'}`} />
-                                                        {expandId !== item.project_id && <BsFillPencilFill className="text-2xl text-white" /> }
-                                                        <FiDownload className="text-3xl text-white" />
-                                                        {expandId === item.project_id ? <IoCloseSharp className="text-3xl text-white" />:  
-                                                            <AiFillDelete className="text-3xl text-white" /> }
+                                                        <LuMessagesSquare className="text-3xl text-white" />
+                                                        {/* <IoMdRefresh className={`text-3xl ${expandId === item.project_id? 'text-green-500': 'text-white'}`} /> */}
+                                                        {item.sending_method == 1 ? (<IoMdRefresh className="text-3xl text-white" onClick={() => handlerChangeCustomerStatus(item.customer_id, 1)}/>) : (<IoMdRefresh className="text-3xl text-white" onClick={() => handlerChangeCustomerStatus(item.customer_id, 2)}/>)}
+                                                        <FiDownload className="text-3xl text-white"  onClick={() => handlerDownloadCustomer(item.customer_id)}/>
+                                                        <IoCloseSharp className="text-3xl text-white" />
                                                     </div>
                                                 </div>
                                             </td>
                                         </tr>
 
-                                        {expandId === item.project_id && item.data.map((childData) => {
+                                        {expandId === item.customer_id && item.data.map((childData, childIndex) => {
                                             let childStatus = '';
-                                            if (item.message_status === 1) {
+                                            if (childData.message_status === 1) {
                                                 childStatus = 'REVIEW'
-                                            }else if (item.message_status === 2) {
+                                            }else if (childData.message_status === 2) {
                                                 childStatus = 'QUED'
-                                            }else if (item.message_status === 3) {
+                                            }else if (childData.message_status === 3) {
                                                 childStatus = 'SENT'
                                             }
                                             return (
@@ -125,10 +185,13 @@ export const NotificationsTable = () => {
                                                     </td>
                                                     <td>
                                                         <div className="flex justify-between mr-3 gap-3 items-center">
+                                                        
                                                             <p className="text-lg font-semibold text-orange-900">{childData.last_message ? childData.last_message.slice(0, 50) + '...' : ''}</p>
                                                             <div className="flex gap-3 items-center">
+                                                                {/* {childIndex} */}
+                                                                <p>{(childStatus === "QUED") && remainTime[dataIndex][childIndex]}</p> 
                                                                 <BsCheckLg className="text-3xl text-gray-400" />
-                                                                <FiDownload className="text-3xl" />
+                                                                <FiDownload className="text-3xl" onClick={() => handlerDownloadProject(childData.project_id)}/>
                                                                 <AiOutlineMinusCircle className="text-3xl text-red-500" /> 
                                                             </div>
                                                         </div>
