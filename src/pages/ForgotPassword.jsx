@@ -117,7 +117,7 @@ export const ForgotPassword = () => {
                     className="w-[100%] h-[100%]"
                 />
                 </div>
-                <input placeholder="New Password" type={showPassword ? "password": "text"} className="p-2 border-none w-[100%] placeholder:text-red-400 focus:outline-none" 
+                <input placeholder="New Password" type={showPassword ? "text": "password"} className="p-2 border-none w-[100%] placeholder:text-red-400 focus:outline-none" 
                   name='newPassword' onChange={handleChange} value={userInfo.newPassword}
                 />
                 <div className="w-10">

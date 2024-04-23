@@ -78,7 +78,7 @@ export const Signup = () => {
                       className="w-[100%] h-[100%]"
                   />
                 </div>
-                <input placeholder="Password" type={showPassword ? "password": "text"} className="p-2 border-none w-[100%] placeholder:text-red-400 focus:outline-none" 
+                <input placeholder="Password" type={showPassword ? "text": "password"} className="p-2 border-none w-[100%] placeholder:text-red-400 focus:outline-none" 
                   name='password' onChange={handleChange} value={userInfo.password}
                 />
                 <div className="w-10">

@@ -10,11 +10,12 @@ import {getNotifications, setQued, cancelQued, setSent, updateLastMessage, downl
 import moment from 'moment';
 import { DATE_FORMAT } from '../../constants';
 import { useDispatch, useSelector } from 'react-redux';
-import { setData } from '../../store/notificationSlice';
+import { setData, updateMessageStatus } from '../../store/notificationSlice';
 import { loadingOff, loadingOn } from '../../store/authSlice';
 import logo from "../../assets/logo.svg"
 import { useNavigate } from 'react-router-dom';
 import { EditMessageModal } from '../common/EditMessageModal';
+import { combineSlices } from '@reduxjs/toolkit';
 
 export const NotificationsTable = () => {
     const [expandId, setExpandId] = useState(null)
@@ -32,14 +33,35 @@ export const NotificationsTable = () => {
     }, [refetch])
 
     useEffect(() => {
-        const interval = setInterval(() => {
+        const interval = setInterval(async () => {
             const now = Date.now();
-            setRemainTime(data?.map((item) => {
-                return item.data?.map((childData) => {
-                    const qued_time = new Date(childData.qued_timestamp)
-                    qued_time.setMinutes(qued_time.getMinutes() + 5);
-                    // console.log(now - qued_time.getTime());
-                    const difference = qued_time.getTime() - now;
+            const today = new Date();
+            let sent_array = [];
+            const timeArray = data?.map((item, itemIndex) => 
+                item.data?.map((childData, childIndex) => {
+
+                    if(childData.message_status != 2) return "";
+
+                    console.log(childData.qued_timestamp);
+                    const timestamp = childData.qued_timestamp.endsWith('Z') ? 
+                          childData.qued_timestamp :
+                          `${childData.qued_timestamp}Z`;
+                    const qued_time = new Date(timestamp);
+                    console.log("qued_time", `${qued_time.getUTCHours()}:${qued_time.getUTCMinutes()}:${qued_time.getUTCSeconds()}`)
+                    // console.log(qued_time.getTime());
+
+                    qued_time.setUTCMinutes(qued_time.getUTCMinutes() + 5); // Use UTC methods
+
+                    // console.log("now", now)
+                    console.log("now", `${today.getUTCHours()}:${today.getUTCMinutes()}:${today.getUTCSeconds()}`)
+                    const difference = qued_time.getTime() - today.getTime();
+
+                    console.log("difference: ", qued_time.getTime() < today.getTime());
+                    
+                    if(childData.message_status == 2 && qued_time.getTime() < today.getTime()) {
+                        sent_array.push([itemIndex, childIndex, childData.project_id]);
+                    }
+                    
                     const durationDate = new Date(difference);
 
                     // Format the duration as a UTC time string (ignoring the date part)
@@ -52,7 +74,21 @@ export const NotificationsTable = () => {
                     // Return the time difference as a string in the format "M:S"
                     return `${parseInt(minutes, 10)}:${seconds}`;
                 })
-            }));
+            )
+
+            setRemainTime(timeArray);
+
+            sent_array.forEach(async (item) => {
+                const itemIndex = item[0];
+                const childIndex = item[1];
+                const project_id = item[2];
+                const newStatus = 3;
+                // await setSent(project_id);
+                // setRefetch(!refetch)
+                dispatch(updateMessageStatus({ itemIndex, childIndex, newStatus }));
+                await handlerSetSent(project_id);
+            })
+
         }, 1000); // This will run every second
         
         // Clean up function
@@ -60,7 +96,7 @@ export const NotificationsTable = () => {
             clearInterval(interval);
         };
       
-    }, [data, remainTime])
+    }, [data, remainTime, updateMessageStatus, dispatch])
 
     const fetchData = async () => {
         dispatch(loadingOn())
@@ -237,8 +273,7 @@ export const NotificationsTable = () => {
                                                             <p className="text-lg font-semibold text-orange-900">{childData.last_message ? childData.last_message.slice(0, 50) + '...' : ''}</p>
                                                             
                                                             <div className="flex gap-3 items-center">
-                                                                {/* {childIndex} */}
-                                                                <p>{(childStatus === "QUED") && remainTime[dataIndex][childIndex]}</p> 
+                                                                <p>{(childStatus === "QUED" && remainTime[dataIndex][childIndex]) && remainTime[dataIndex][childIndex]}</p> 
                                                                 <LuPencil className="text-2xl text-gray-400 cursor-pointer" 
                                                                     onClick={() => {
                                                                         setTurnOnEdit(childData.project_id)
@@ -251,7 +286,7 @@ export const NotificationsTable = () => {
                                                                 { childStatus === 'QUED' && (
                                                                     <div className='flex cursor-pointer'>
                                                                         <BsCheckLg className="text-3xl text-gray-400 cursor-pointer" />
-                                                                        <BsCheckLg className="text-3xl text-green-500 cursor-pointer -ml-4" />
+                                                                        <BsCheckLg className="text-3xl text-gray-500 cursor-pointer -ml-4" />
                                                                     </div>
                                                                 )}
                                                                 { childStatus === 'SENT' && (
