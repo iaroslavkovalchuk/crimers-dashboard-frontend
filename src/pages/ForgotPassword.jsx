@@ -9,6 +9,7 @@ import mailPNG from "../assets/email.svg"
 import eyePNG from "../assets/eye.svg"
 import showPNG from "../assets/show.svg"
 import lockPNG from "../assets/lock.png"
+import toast from "react-hot-toast"
 
 export const ForgotPassword = () => {
   const [showPassword, showPass, hidePass] = usePassword()
@@ -35,7 +36,7 @@ export const ForgotPassword = () => {
 
   const handleChangePassword = async () => {
     if (!userInfo.email || !userInfo.newPassword) {
-      alert('Fields cannot be empty!');
+      toast.error('Fields cannot be empty!');
       return;
     }
     dispatch(loadingOn())
@@ -47,21 +48,21 @@ export const ForgotPassword = () => {
     
     dispatch(loadingOff())
     if (typeof res === 'string') {
-      alert(res);
+      toast.error(res);
       return;
     }
     if (res.success) {
-      alert("Password changed successfully!");
+      toast.success("Password changed successfully!");
       navigate('/signin')
     }
     else{
-      alert("Unkown Error!")
+      toast.error("Unkown Error!")
     }
   }
 
   const handleConfirmEmail = async () => {
     if (!userInfo.email) {
-      alert('Email field cannot be empty!');
+      toast.error('Email field cannot be empty!');
       return;
     }
     dispatch(loadingOn())
@@ -72,14 +73,14 @@ export const ForgotPassword = () => {
     
     dispatch(loadingOff())
     if (typeof res === 'string') {
-      alert(res);
+      toast.error(res);
       return;
     }
     if (res.success) {
-      alert("Chnage Password URL was sent to your email address!")
+      toast.success("Chnage Password URL was sent to your email address!")
     }
     else{
-      alert("Unkown Error!")
+      toast.error("Unkown Error!")
     }
   }
 

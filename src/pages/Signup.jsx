@@ -9,6 +9,7 @@ import mailPNG from "../assets/email.svg"
 import eyePNG from "../assets/eye.svg"
 import showPNG from "../assets/show.svg"
 import lockSvg from "../assets/lock.svg"
+import toast from "react-hot-toast"
 
 export const Signup = () => {
   const [showPassword, showPass, hidePass] = usePassword()
@@ -33,7 +34,7 @@ export const Signup = () => {
 
   const handleSignup = async () => {
     if (!userInfo.email || !userInfo.password || !userInfo.confirmPassword) {
-      alert('Signup fields cannot be empty!');
+      toast.error('Signup fields cannot be empty!');
       return;
     }
     dispatch(loadingOn())
@@ -41,7 +42,7 @@ export const Signup = () => {
     
     dispatch(loadingOff())
     if (typeof res === 'string') {
-      alert(res);
+      toast.error(res);
       return;
     }
     if (res) {

@@ -159,7 +159,7 @@ export const NotificationsBox = () => {
     }
 
     const handlerChangeCustomerStatus = async (customer_id, method) => {
-        alert(method);
+        toast(method);
         dispatch(loadingOn())
         await changeCustomerStatus(customer_id, method)
         dispatch(loadingOff())

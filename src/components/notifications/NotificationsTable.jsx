@@ -107,7 +107,7 @@ export const NotificationsTable = () => {
         dispatch(loadingOff())
 
         if (res.detail === "Could not validate credentials") {
-            alert('Unauthorized user!');
+            toast.error('Unauthorized user!');
             navigate('/signup')
         }
         
@@ -170,7 +170,7 @@ export const NotificationsTable = () => {
         setRefetch(!refetch)
     }
     const handlerChangeCustomerStatus = async (customer_id, method) => {
-        alert(method);
+        toast(method);
         dispatch(loadingOn())
         await changeCustomerStatus(customer_id, method)
         dispatch(loadingOff())

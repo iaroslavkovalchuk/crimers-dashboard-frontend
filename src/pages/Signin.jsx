@@ -9,6 +9,7 @@ import mailPNG from "../assets/email.svg"
 import eyePNG from "../assets/eye.svg"
 import showPNG from "../assets/show.svg"
 import lockSvg from "../assets/lock.svg"
+import toast from "react-hot-toast"
 
 export const Signin = () => {
   const [showPassword, showPass, hidePass] = usePassword()
@@ -31,7 +32,7 @@ export const Signin = () => {
 
   const handleSignin = async () => {
     if (!userInfo.email || !userInfo.password) {
-      alert('Signin fields cannot be empty!');
+      toast.error('Signin fields cannot be empty!');
       return;
     }
     
@@ -40,16 +41,16 @@ export const Signin = () => {
 
     dispatch(loadingOff())
     if (res['detail']) {
-      alert(res.detail);
+      toast.error(res.detail);
       return;
     }
     if (res['access_token']) {
-      alert("You signed in successfully");
+      toast.success("You signed in successfully");
       localStorage.setItem('access_token', res.access_token)
       navigate('/notifications')
     }
     else{
-      alert("Email or Password are incorrect!");
+      toast.error("Email or Password are incorrect!");
     }
   }
 
