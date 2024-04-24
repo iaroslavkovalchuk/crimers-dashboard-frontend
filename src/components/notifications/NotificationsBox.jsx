@@ -15,6 +15,8 @@ import moment from 'moment';
 import { DATE_FORMAT } from '../../constants';
 import { EditMessageModal } from '../common/EditMessageModal';
 import toast from 'react-hot-toast';
+import messageIcon from "../../assets/message.svg";
+import phoneIcon from "../../assets/phone.svg"
 
 export const NotificationsBox = () => {
     const [expandId, setExpandId] = useState(null)
@@ -271,8 +273,21 @@ export const NotificationsBox = () => {
                                                     )}
                                                     { childStatus === 'SENT' && (
                                                         <div className='flex cursor-pointer'>
-                                                            <BsCheckLg className="text-3xl text-green-500 cursor-pointer" />
-                                                            <BsCheckLg className="text-3xl text-green-500 cursor-pointer -ml-4" />
+                                                            {
+                                                                (childData.email !== "") && (<>
+                                                                    <img src={messageIcon} alt="logo" style={{width:"30px", height: "30px", marginRight: "-30px"}}/>
+                                                                    <BsCheckLg className={`text-3xl ${childData.email_sent_success === 1 ? 'text-green-500' : 'text-red-500'} cursor-pointer`} />
+                                                                    <BsCheckLg className={`text-3xl ${childData.email_sent_success === 1 ? 'text-green-500' : 'text-red-500'} cursor-pointer -ml-4`} />
+                                                                </>)
+                                                            }
+                                                            
+                                                            {
+                                                                (childData.phone !== "") && (<>
+                                                                    <img src={phoneIcon} alt="logo" style={{width:"30px", height: "30px", marginRight: "-30px"}}/>
+                                                                    <BsCheckLg className={`text-3xl ${childData.phone_sent_success === 1 ? 'text-green-500' : 'text-red-500'} cursor-pointer -ml-1`} />
+                                                                    <BsCheckLg className={`text-3xl ${childData.phone_sent_success === 1 ? 'text-green-500' : 'text-red-500'} cursor-pointer -ml-4 -mr-2`} />
+                                                                </>)
+                                                            }
                                                         </div>
                                                     )}
                                                     <FiDownload className="text-3xl" />
