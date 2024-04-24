@@ -12,7 +12,9 @@ import { DATE_FORMAT } from '../../constants';
 import { useDispatch, useSelector } from 'react-redux';
 import { setData, updateMessageStatus } from '../../store/notificationSlice';
 import { loadingOff, loadingOn } from '../../store/authSlice';
-import logo from "../../assets/logo.svg"
+import logo from "../../assets/logo.svg";
+import messageIcon from "../../assets/message.svg";
+import phoneIcon from "../../assets/phone.svg"
 import { useNavigate } from 'react-router-dom';
 import { EditMessageModal } from '../common/EditMessageModal';
 import { combineSlices } from '@reduxjs/toolkit';
@@ -126,7 +128,22 @@ export const NotificationsTable = () => {
     const handlerDownloadCustomer = async (customer_id) => {
         await downloadCustomerMessage(customer_id)
     }
-    const handlerSetQued = async (project_id) => {
+    const handlerSetQued = async (project_id, email, phone) => {
+        let count = 0;
+        if(email === ""){
+            count += 1;
+            alert("Can't find customer's email address.");
+        }
+        if(phone === ""){
+            count += 1;
+            alert("Can't find customer's phone number.");
+        }
+
+        if(count == 2){
+            alert("Excuse me, you can't send message to this customer. There is no phone number or email address.");
+            return;
+        }
+
         dispatch(loadingOn())
         await setQued(project_id)
         dispatch(loadingOff())
@@ -253,7 +270,7 @@ export const NotificationsTable = () => {
                                             }else if (childData.message_status === 3) {
                                                 childStatus = 'SENT'
                                             }
-                                            
+
                                             return (
                                                 <tr key={childData.project_id} className={`bg-white border-t-2 border-t-gray-300`}>
                                                     <td />
@@ -274,14 +291,15 @@ export const NotificationsTable = () => {
                                                             
                                                             <div className="flex gap-3 items-center">
                                                                 <p>{(childStatus === "QUED" && remainTime[dataIndex][childIndex]) && remainTime[dataIndex][childIndex]}</p> 
-                                                                <LuPencil className="text-2xl text-gray-400 cursor-pointer" 
+                                                                {childStatus != "SENT" && 
+                                                                    <LuPencil className="text-2xl text-gray-400 cursor-pointer" 
                                                                     onClick={() => {
                                                                         setTurnOnEdit(childData.project_id)
                                                                         setEditMessage(childData.last_message || '')
                                                                     }}
-                                                                />
+                                                                /> }
                                                                 { childStatus === 'REVIEW' && <BsCheckLg className="text-3xl text-gray-400 cursor-pointer" 
-                                                                    onClick={() => handlerSetQued(childData.project_id)}
+                                                                    onClick={() => handlerSetQued(childData.project_id, childData.email, childData.phone)}
                                                                 /> }
                                                                 { childStatus === 'QUED' && (
                                                                     <div className='flex cursor-pointer'>
@@ -291,14 +309,36 @@ export const NotificationsTable = () => {
                                                                 )}
                                                                 { childStatus === 'SENT' && (
                                                                     <div className='flex cursor-pointer'>
-                                                                        <BsCheckLg className="text-3xl text-green-500 cursor-pointer" />
-                                                                        <BsCheckLg className="text-3xl text-green-500 cursor-pointer -ml-4" />
+                                                                        {
+                                                                            (childData.email !== "") && (<>
+                                                                                <img src={messageIcon} alt="logo" style={{width:"30px", height: "30px", marginRight: "-30px"}}/>
+                                                                                <BsCheckLg className={`text-3xl ${childData.email_sent_success === 1 ? 'text-green-500' : 'text-red-500'} cursor-pointer`} />
+                                                                                <BsCheckLg className={`text-3xl ${childData.email_sent_success === 1 ? 'text-green-500' : 'text-red-500'} cursor-pointer -ml-4`} />
+                                                                            </>)
+                                                                        }
+                                                                        
+                                                                        {
+                                                                            (childData.phone !== "") && (<>
+                                                                                <img src={phoneIcon} alt="logo" style={{width:"30px", height: "30px", marginRight: "-30px"}}/>
+                                                                                <BsCheckLg className={`text-3xl ${childData.phone_sent_success === 1 ? 'text-green-500' : 'text-red-500'} cursor-pointer -ml-1`} />
+                                                                                <BsCheckLg className={`text-3xl ${childData.phone_sent_success === 1 ? 'text-green-500' : 'text-red-500'} cursor-pointer -ml-4 -mr-2`} />
+                                                                            </>)
+                                                                        }
                                                                     </div>
                                                                 )}
+                                                                {/* { childStatus === 'SENT' && (
+                                                                    <div className='flex cursor-pointer'>
+                                                                        <img src={phoneIcon} alt="logo" style={{width:"30px", height: "30px", marginRight: "-30px"}}
+                                                                        />
+                                                                        <BsCheckLg className="text-3xl text-green-500 cursor-pointer" />
+                                                                        <BsCheckLg className="text-3xl text-green-500 cursor-pointer -ml-4" />
+                                                                        
+                                                                    </div>
+                                                                )} */}
                                                                 { childStatus === 'QUED' && <FiMinusCircle className='text-2xl cursor-pointer text-red-500' 
                                                                     onClick={() => handlerCancelQued(childData.project_id) }
                                                                 />}
-                                                                <FiDownload className="text-3xl cursor-pointer" onClick={() => handlerDownloadProject(childData.project_id)}/>
+                                                                <FiDownload className="text-3xl cursor-pointer " onClick={() => handlerDownloadProject(childData.project_id)}/>
 
                                                                 { childStatus === 'REVIEW' && <AiFillDelete className="text-3xl text-red-500 cursor-pointer"
                                                                     onClick={() => {
