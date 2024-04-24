@@ -10,10 +10,11 @@ import { BsCheckLg } from "react-icons/bs";
 import { useDispatch, useSelector } from 'react-redux';
 import { loadingOff, loadingOn } from '../../store/authSlice';
 import { cancelQued, changeCustomerStatus, deleteCustomer, getNotifications, setQued, setSent, updateLastMessage } from '../../services/notifications';
-import { setData } from '../../store/notificationSlice';
+import { setData, updateMessageStatus } from '../../store/notificationSlice';
 import moment from 'moment';
 import { DATE_FORMAT } from '../../constants';
 import { EditMessageModal } from '../common/EditMessageModal';
+import toast from 'react-hot-toast';
 
 export const NotificationsBox = () => {
     const [expandId, setExpandId] = useState(null)
@@ -23,10 +24,78 @@ export const NotificationsBox = () => {
     const [turnOnEdit, setTurnOnEdit] = useState(null)
     const [refetch, setRefetch] = useState(false);
     const dispatch = useDispatch()
+    const [remainTime, setRemainTime] = useState([]);
 
     useEffect(() => {
         fetchData()
     }, [refetch])
+
+    useEffect(() => {
+        const interval = setInterval(async () => {
+            const now = Date.now();
+            const today = new Date();
+            let sent_array = [];
+            const timeArray = data?.map((item, itemIndex) => 
+                item.data?.map((childData, childIndex) => {
+
+                    if(childData.message_status != 2) return "";
+
+                    console.log(childData.qued_timestamp);
+                    const timestamp = childData.qued_timestamp.endsWith('Z') ? 
+                          childData.qued_timestamp :
+                          `${childData.qued_timestamp}Z`;
+                    const qued_time = new Date(timestamp);
+                    console.log("qued_time", `${qued_time.getUTCHours()}:${qued_time.getUTCMinutes()}:${qued_time.getUTCSeconds()}`)
+                    // console.log(qued_time.getTime());
+
+                    qued_time.setUTCMinutes(qued_time.getUTCMinutes() + 5); // Use UTC methods
+
+                    // console.log("now", now)
+                    console.log("now", `${today.getUTCHours()}:${today.getUTCMinutes()}:${today.getUTCSeconds()}`)
+                    const difference = qued_time.getTime() - today.getTime();
+
+                    console.log("difference: ", qued_time.getTime() < today.getTime());
+                    
+                    if(childData.message_status == 2 && qued_time.getTime() < today.getTime()) {
+                        sent_array.push([itemIndex, childIndex, childData.project_id]);
+                    }
+                    
+                    const durationDate = new Date(difference);
+
+                    // Format the duration as a UTC time string (ignoring the date part)
+                    const timeString = durationDate.toISOString().substr(11, 8); // "HH:mm:ss" format
+
+                    // Extract minutes and seconds
+                    const minutes = timeString.substr(3, 2);
+                    const seconds = timeString.substr(6, 2);
+
+                    // Return the time difference as a string in the format "M:S"
+                    return `${parseInt(minutes, 10)}:${seconds}`;
+                })
+            )
+
+            setRemainTime(timeArray);
+
+            sent_array.forEach(async (item) => {
+                const itemIndex = item[0];
+                const childIndex = item[1];
+                const project_id = item[2];
+                const newStatus = 3;
+                // await setSent(project_id);
+                // setRefetch(!refetch)
+                dispatch(updateMessageStatus({ itemIndex, childIndex, newStatus }));
+                await handlerSetSent(project_id);
+            })
+
+        }, 1000); // This will run every second
+        
+        // Clean up function
+        return () => {
+            clearInterval(interval);
+        };
+      
+    }, [data, remainTime, updateMessageStatus, dispatch])
+
 
     const fetchData = async () => {
         dispatch(loadingOn())
@@ -63,7 +132,19 @@ export const NotificationsBox = () => {
         setRefetch(!refetch)
     }
 
-    const handlerSetQued = async (project_id) => {
+    const handlerSetQued = async (project_id, email, phone) => {
+        if(!email){
+            toast.error("Can't find customer's email address.")
+        }
+        if(!phone){
+            toast.error("Can't find customer's phone number.")
+        }
+
+        if(!email && !phone){
+            toast.error("Excuse me, you can't send message to this customer. There is no phone number or email address.")
+            return;
+        }
+
         dispatch(loadingOn())
         await setQued(project_id)
         dispatch(loadingOff())
@@ -113,7 +194,7 @@ export const NotificationsBox = () => {
                 </div>
 
                 <div>
-                    { data.map((item) => {
+                    { data.map((item, dataIndex) => {
                         const colors = {};
                         item.data.forEach((childData) => {
                             let childStatus = 'REVIEW';
@@ -143,7 +224,6 @@ export const NotificationsBox = () => {
                                         </p>
                                     </div>
                                     <div className='flex items-center gap-1'>
-
                                         {expandId !== item.project_id &&
                                             Object.values(colors).map((color, i) => {
                                                 return <div key={color} className={`${color} w-7 h-7 rounded-[50%] ${i !== 0 ? '-ml-4': ''}`} />
@@ -158,7 +238,7 @@ export const NotificationsBox = () => {
                                     </div>
                                 </div>
 
-                                {expandId === item.project_id && item.data.map((childData) => {
+                                {expandId === item.project_id && item.data.map((childData, childIndex) => {
                                     let childStatus = 'REVIEW';
                                     if (childData.message_status === 1) {
                                         childStatus = 'REVIEW'
@@ -179,8 +259,9 @@ export const NotificationsBox = () => {
                                                         </p>
                                                 </div>
                                                 <div className="flex gap-3 items-center">
+                                                    <p className='text-green-500 font-semibold'>{(childStatus === "QUED" && remainTime[dataIndex][childIndex]) && remainTime[dataIndex][childIndex]}</p> 
                                                     { childStatus === 'REVIEW' && <BsCheckLg className="text-3xl text-gray-400 cursor-pointer" 
-                                                        onClick={() => handlerSetQued(childData.project_id)}
+                                                        onClick={() => handlerSetQued(childData.project_id, childData.email, childData.phone)}
                                                     /> }
                                                     { childStatus === 'QUED' && (
                                                         <div className='flex cursor-pointer'>

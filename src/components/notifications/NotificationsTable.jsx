@@ -18,6 +18,7 @@ import phoneIcon from "../../assets/phone.svg"
 import { useNavigate } from 'react-router-dom';
 import { EditMessageModal } from '../common/EditMessageModal';
 import { combineSlices } from '@reduxjs/toolkit';
+import toast from 'react-hot-toast';
 
 export const NotificationsTable = () => {
     const [expandId, setExpandId] = useState(null)
@@ -129,18 +130,15 @@ export const NotificationsTable = () => {
         await downloadCustomerMessage(customer_id)
     }
     const handlerSetQued = async (project_id, email, phone) => {
-        let count = 0;
-        if(email === ""){
-            count += 1;
-            alert("Can't find customer's email address.");
+        if(!email){
+            toast.error("Can't find customer's email address.")
         }
-        if(phone === ""){
-            count += 1;
-            alert("Can't find customer's phone number.");
+        if(!phone){
+            toast.error("Can't find customer's phone number.")
         }
 
-        if(count == 2){
-            alert("Excuse me, you can't send message to this customer. There is no phone number or email address.");
+        if(!email && !phone){
+            toast.error("Excuse me, you can't send message to this customer. There is no phone number or email address.")
             return;
         }
 
