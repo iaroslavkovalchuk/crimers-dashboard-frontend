@@ -18,7 +18,6 @@ import phoneIcon from "../../assets/phone.svg"
 import { useNavigate } from 'react-router-dom';
 import { EditMessageModal } from '../common/EditMessageModal';
 import { combineSlices } from '@reduxjs/toolkit';
-import toast from 'react-hot-toast';
 
 export const NotificationsTable = () => {
     const [expandId, setExpandId] = useState(null)
@@ -107,7 +106,7 @@ export const NotificationsTable = () => {
         dispatch(loadingOff())
 
         if (res.detail === "Could not validate credentials") {
-            toast.error('Unauthorized user!');
+            alert('Unauthorized user!');
             navigate('/signup')
         }
         
@@ -130,15 +129,18 @@ export const NotificationsTable = () => {
         await downloadCustomerMessage(customer_id)
     }
     const handlerSetQued = async (project_id, email, phone) => {
-        if(!email){
-            toast.error("Can't find customer's email address.")
+        let count = 0;
+        if(email === ""){
+            count += 1;
+            alert("Can't find customer's email address.");
         }
-        if(!phone){
-            toast.error("Can't find customer's phone number.")
+        if(phone === ""){
+            count += 1;
+            alert("Can't find customer's phone number.");
         }
 
-        if(!email && !phone){
-            toast.error("Excuse me, you can't send message to this customer. There is no phone number or email address.")
+        if(count == 2){
+            alert("Excuse me, you can't send message to this customer. There is no phone number or email address.");
             return;
         }
 
@@ -170,7 +172,7 @@ export const NotificationsTable = () => {
         setRefetch(!refetch)
     }
     const handlerChangeCustomerStatus = async (customer_id, method) => {
-        toast(method);
+        // alert(method);
         dispatch(loadingOn())
         await changeCustomerStatus(customer_id, method)
         dispatch(loadingOff())
