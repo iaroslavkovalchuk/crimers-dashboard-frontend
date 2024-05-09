@@ -240,7 +240,17 @@ export const NotificationsTable = () => {
                                             <td className="text-lg font-semibold text-white text-center">{!(expandId === item.customer_id) && (item.sent_timestamp ? moment(item.sent_timestamp).format(DATE_FORMAT) : '-')}</td>
                                             <td className="text-lg font-semibold text-white text-center">{!(expandId === item.customer_id)  && item.lastname}</td>
                                             <td className="text-lg font-semibold text-white text-center">{!(expandId === item.customer_id)  && item.firstname}</td>
-                                            <td className="text-lg font-semibold text-white text-center">{!(expandId === item.customer_id)  && item.claim_number}</td>
+                                            <td className="text-lg font-semibold text-white text-center">
+                                                {
+                                                    !(expandId === item.customer_id)  && (
+                                                        <>
+                                                            {item.project_name}
+                                                            <br />
+                                                            {item.claim_number}
+                                                        </>
+                                                    )
+                                                }
+                                            </td>
                                             <td className="text-lg font-semibold text-white text-center">{!(expandId === item.customer_id)  && status}</td>
                                             <td>
                                                 <div className='flex items-center justify-between'>
@@ -272,12 +282,20 @@ export const NotificationsTable = () => {
                                             }
 
                                             return (
-                                                <tr key={childData.project_id} className={`bg-white border-t-2 border-t-gray-300`}>
+                                                <tr key={childData.project_id} className={`bg-white border-t-2 border-t-gray-300 text-center`}>
                                                     <td />
                                                     <td className="text-lg font-semibold py-2">{childData.sent_timestamp ? moment(item.sent_timestamp).format(DATE_FORMAT) : '-'}</td>
                                                     <td className="text-lg font-semibold">{childData.lastname}</td>
                                                     <td className="text-lg font-semibold">{childData.firstname}</td>
-                                                    <td className="text-lg font-semibold">{childData.claim_number}</td>
+                                                    <td className="text-lg font-semibold">
+                                                        {
+                                                            <>
+                                                                {childData.project_name}
+                                                                <br />
+                                                                {childData.claim_number}
+                                                            </>
+                                                        }
+                                                    </td>
                                                     <td className="text-lg font-semibold">
                                                         <div className={`w-[80%] mx-auto text-orange-900 text-center py-1
                                                             ${childStatus === 'REVIEW' ? 'bg-yellow-500' : childStatus === 'QUED' ? 'bg-yellow-300' : 'bg-green-300'}`}>
