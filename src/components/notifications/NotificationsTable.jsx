@@ -6,7 +6,8 @@ import { AiFillDelete, AiFillLike } from "react-icons/ai";
 import { LuMessagesSquare, LuPencil } from "react-icons/lu";
 import { IoCloseSharp } from "react-icons/io5";
 import { BsCheckLg } from "react-icons/bs";
-import {getNotifications, setQued, cancelQued, setSent, updateLastMessage, downloadProjectMessage, downloadCustomerMessage, changeCustomerStatus, deleteCustomer} from '../../services/notifications'
+import { combineSlices } from '@reduxjs/toolkit';
+import {getNotifications, setQued, cancelQued, setSent, updateLastMessage, downloadProjectMessage, downloadCustomerMessage, changeCustomerStatus, deleteCustomer, setVariables} from '../../services/notifications'
 import moment from 'moment';
 import { DATE_FORMAT } from '../../constants';
 import { useDispatch, useSelector } from 'react-redux';
@@ -17,7 +18,8 @@ import messageIcon from "../../assets/message.svg";
 import phoneIcon from "../../assets/phone.svg"
 import { useNavigate } from 'react-router-dom';
 import { EditMessageModal } from '../common/EditMessageModal';
-import { combineSlices } from '@reduxjs/toolkit';
+import { SettingsModal } from '../common/SettingsModal'; // Import the SettingsModal component
+
 
 export const NotificationsTable = () => {
     const [expandId, setExpandId] = useState(null)
@@ -27,6 +29,18 @@ export const NotificationsTable = () => {
     const [refetch, setRefetch] = useState(false);
     const dispatch = useDispatch()
     
+    // State to manage the visibility and data of the settings modal
+    const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false);
+    const [settingsData, setSettingsData] = useState({
+        openAIKey: '',
+        twilioPhoneNumber: '',
+        twilioAccountSID: '',
+        twilioAuthToken: '',
+        sendgridEmail: '',
+        sendgridApiKey: '',
+    });
+
+
     const [remainTime, setRemainTime] = useState([]);
     const navigate = useNavigate()
 
@@ -52,7 +66,7 @@ export const NotificationsTable = () => {
                     console.log("qued_time", `${qued_time.getUTCHours()}:${qued_time.getUTCMinutes()}:${qued_time.getUTCSeconds()}`)
                     // console.log(qued_time.getTime());
 
-                    qued_time.setUTCMinutes(qued_time.getUTCMinutes() + 5); // Use UTC methods
+                    qued_time.setUTCMinutes(qued_time.getUTCMinutes() + 0); // Use UTC methods
 
                     // console.log("now", now)
                     console.log("now", `${today.getUTCHours()}:${today.getUTCMinutes()}:${today.getUTCSeconds()}`)
@@ -192,6 +206,29 @@ export const NotificationsTable = () => {
         setRefetch(!refetch)
     }
 
+    // Function to open the settings modal
+    const openSettingsModal = () => {
+        setIsSettingsModalOpen(true);
+    };
+
+    // Function to close the settings modal
+    const closeSettingsModal = () => {
+        setIsSettingsModalOpen(false);
+    };
+
+    // Function to save settings data
+    const saveSettings = async (newSettings) => {
+        // Perform validation or API requests here to save the settings
+        console.log('Settings saved:', newSettings);
+        // Update the state with the new settings
+        setSettingsData(newSettings);
+
+        const res = await setVariables(newSettings);
+        console.log("settings: ", res);
+        // Close the modal
+        closeSettingsModal();
+    };
+
     return (
         <div>
             <div className="w-[400px] pl-8 pt-8">
@@ -204,18 +241,20 @@ export const NotificationsTable = () => {
                 <div className="py-2 px-4 bg-red-700 inline-block mb-[1px]">
                     <p className="text-xl font-semibold text-white">NOTIFICATIONS</p>
                 </div>
-
+                <div className="py-2 px-6 bg-green-700 inline-block mb-[1px] cursor-pointer" style={{"float": "right"}} onClick={openSettingsModal}>
+                    <p className="text-xl font-semibold text-white">SETTINGS</p>
+                </div>
                 <div>
                     <table className="w-[100%]">
                         <thead className=" bg-red-700">
                             <tr>
                                 <th className="w-[5%]"/>
-                                <th className="w-[10%] text-center p-2 text-lg text-white">Send On</th>
-                                <th className="w-[10%] text-white text-lg text-center">Last Name</th>
-                                <th className="w-[10%] text-white text-lg text-center">First Name</th>
-                                <th className="w-[12%] text-white text-lg text-center">Claim</th>
+                                <th className="w-[9%] text-center p-2 text-lg text-white">Send On</th>
+                                <th className="w-[9%] text-white text-lg text-center">Last Name</th>
+                                <th className="w-[9%] text-white text-lg text-center">First Name</th>
+                                <th className="w-[18%] text-white text-lg text-center">Claim</th>
                                 <th className="w-[12%] text-white text-lg text-center">Status</th>
-                                <th className="w-[41%] text-white text-lg text-center">Message</th>
+                                <th className="w-[38%] text-white text-lg text-center">Message</th>
                             </tr>
                         </thead>
                         
@@ -379,6 +418,14 @@ export const NotificationsTable = () => {
                         </tbody>
                     </table>
                     { turnOnEdit && <EditMessageModal message={editMessage} onSave={handlerUpdateLastMessage} onCancel={handleCancelMessage} /> }
+                    
+                    {/* Settings Modal */}
+                    <SettingsModal
+                        isOpen={isSettingsModalOpen}
+                        onSave={saveSettings}
+                        onCancel={closeSettingsModal}
+                        settings={settingsData}
+                    />
                 </div>
             </div>
         </div>

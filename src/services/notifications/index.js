@@ -165,3 +165,23 @@ export const deleteCustomer = async (customer_id) => {
         console.log(error)
     }
 }
+
+// Set settings variable
+export const setVariables = async (variables) => {
+    try {
+        const token = localStorage.getItem('access_token') || '';
+        const res = await fetch(API + 'set-variables', { // Assuming 'set-variables' is the endpoint for setting variables
+            method: 'POST', // Use POST method to send data
+            headers: {
+                'Content-Type': 'application/json', // Indicate that we're sending JSON data
+                'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify(variables) // Convert the variables object to a JSON string
+        });
+        const json = await res.json();
+        return json;
+    } catch (error) {
+        console.error(error);
+        return null; // Return null or handle the error as needed
+    }
+}

@@ -46,6 +46,7 @@ export const Signup = () => {
       return;
     }
     if (res) {
+      toast.success("You signed up successfully");
       navigate('/signin')
     }
   }
@@ -98,14 +99,14 @@ export const Signup = () => {
                         className="w-[100%] h-[100%]"
                     />
                 </div>
-                <input placeholder="Confirm password" type={showConfirmPassword ? "password": "text"} className="p-2 border-none w-[100%] placeholder:text-red-400 focus:outline-none" 
+                <input placeholder="Confirm password" type={showConfirmPassword ? "text": "password"} className="p-2 border-none w-[100%] placeholder:text-red-400 focus:outline-none" 
                   name='confirmPassword' onChange={handleChange} value={userInfo.confirmPassword}
                 />
                 <div className="w-10">
-                    { showConfirmPassword ? <img src="https://delmar-react-tailwind.vercel.app/static/media/eye-lock.d107eb1ce1b5084858dc197fcebf2cf4.svg" alt="image" 
+                    { showConfirmPassword ? <img src={showPNG} alt="image" 
                         className="w-[100%] h-[100%] cursor-pointer"  onClick={hideConfirmPass}
                     /> :
-                    <img src="https://delmar-react-tailwind.vercel.app/static/media/eye.d0bc4ebd567464de6ea6c8aacbbed3a1.svg" alt="image" 
+                    <img src={eyePNG} alt="image" 
                         className="w-[100%] h-[100%] cursor-pointer" onClick={showConfirmPass}
                     /> }
                 </div>

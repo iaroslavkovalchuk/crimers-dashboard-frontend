@@ -91,10 +91,10 @@ export const Signin = () => {
               name="password" onChange={handleChange} value={userInfo.password}
             />
             <div className="w-10">
-              { showPassword ? <img src={eyePNG} alt="image" 
+              { showPassword ? <img src={showPNG} alt="image" 
                 className="w-[100%] h-[100%] cursor-pointer"  onClick={hidePass}
               /> :
-              <img src={showPNG} alt="image" 
+              <img src={eyePNG} alt="image" 
                 className="w-[100%] h-[100%] cursor-pointer" onClick={showPass}
               /> }
             </div>
