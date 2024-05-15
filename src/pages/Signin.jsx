@@ -81,8 +81,8 @@ export const Signin = () => {
             />
           </div>
 
-          <div className="shadow-md rounded-2xl p-2 bg-white flex items-center">
-            <div className="w-12">
+          <div className="shadow-md rounded-2xl p-1 bg-white flex items-center">
+            <div className="w-14">
               <img src={lockSvg} alt="image" 
                 className="w-[100%] h-[100%]"
               />

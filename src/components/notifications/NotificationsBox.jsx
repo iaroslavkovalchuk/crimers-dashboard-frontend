@@ -17,6 +17,7 @@ import { EditMessageModal } from '../common/EditMessageModal';
 import toast from 'react-hot-toast';
 import messageIcon from "../../assets/message.svg";
 import phoneIcon from "../../assets/phone.svg"
+import logo from "../../assets/logo.svg";
 
 export const NotificationsBox = () => {
     const [expandId, setExpandId] = useState(null)
@@ -185,7 +186,7 @@ export const NotificationsBox = () => {
     return (
         <div>
             <div className="w-[300px] pl-8 pt-8">
-                <img src="https://delmar-react-tailwind.vercel.app/static/media/logo.9f804465c04a053b763ff5493042c6f5.svg" alt="logo" 
+                <img src={logo} alt="logo" 
                     className="w-[100%] h-[100%]"
                 />
             </div>
@@ -222,7 +223,7 @@ export const NotificationsBox = () => {
                                     </div>
                                     <div>
                                         <p className="text-lg font-semibold text-white">
-                                            {item.lastname && item.firstname && `${item.lastname}, ${item.firstname}`}
+                                            {item.last_name && item.first_name && `${item.last_name}, ${item.first_name}`}
                                         </p>
                                     </div>
                                     <div className='flex items-center gap-1'>
@@ -275,7 +276,7 @@ export const NotificationsBox = () => {
                                                         <div className='flex cursor-pointer'>
                                                             {
                                                                 (childData.email !== "") && (<>
-                                                                    <img src={messageIcon} alt="logo" style={{width:"30px", height: "30px", marginRight: "-30px"}}/>
+                                                                    <img src={messageIcon} alt="messageIcon" style={{width:"30px", height: "30px", marginRight: "-30px"}}/>
                                                                     <BsCheckLg className={`text-3xl ${childData.email_sent_success === 1 ? 'text-green-500' : 'text-red-500'} cursor-pointer`} />
                                                                     <BsCheckLg className={`text-3xl ${childData.email_sent_success === 1 ? 'text-green-500' : 'text-red-500'} cursor-pointer -ml-4`} />
                                                                 </>)
@@ -283,7 +284,7 @@ export const NotificationsBox = () => {
                                                             
                                                             {
                                                                 (childData.phone !== "") && (<>
-                                                                    <img src={phoneIcon} alt="logo" style={{width:"30px", height: "30px", marginRight: "-30px"}}/>
+                                                                    <img src={phoneIcon} alt="phoneIcon" style={{width:"30px", height: "30px", marginRight: "-30px"}}/>
                                                                     <BsCheckLg className={`text-3xl ${childData.phone_sent_success === 1 ? 'text-green-500' : 'text-red-500'} cursor-pointer -ml-1`} />
                                                                     <BsCheckLg className={`text-3xl ${childData.phone_sent_success === 1 ? 'text-green-500' : 'text-red-500'} cursor-pointer -ml-4 -mr-2`} />
                                                                 </>)
@@ -333,6 +334,7 @@ export const NotificationsBox = () => {
             </div>
 
             { turnOnEdit && <EditMessageModal message={editMessage} onSave={handlerUpdateLastMessage} onCancel={handleCancelMessage} /> }
+            
         </div>
     )
 }

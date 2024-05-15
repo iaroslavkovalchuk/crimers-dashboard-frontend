@@ -3,7 +3,8 @@ import { configureStore, createSlice } from "@reduxjs/toolkit";
 const notificationSlice = createSlice({
     name: 'notification',
     initialState: {
-        data : []
+        data : [],
+        sendTimer: 5
     },
     reducers: {
         setData: (state, action) => {
@@ -31,9 +32,12 @@ const notificationSlice = createSlice({
                 // Directly update the message_status using Immer's proxy state
                 state.data[itemIndex].data[childIndex].message_status = newStatus;
             }
-        }
+        },
+        setSendTimer: (state, action) => {
+            state.sendTimer = action.payload;
+        },
     }
 })
 
 export default notificationSlice.reducer;
-export const { setData, updateMessageStatus } = notificationSlice.actions;
+export const { setData, updateMessageStatus, setSendTimer } = notificationSlice.actions;

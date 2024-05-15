@@ -8,7 +8,7 @@ import logo from "../assets/logo.svg"
 import mailPNG from "../assets/email.svg"
 import eyePNG from "../assets/eye.svg"
 import showPNG from "../assets/show.svg"
-import lockPNG from "../assets/lock.png"
+import lockPNG from "../assets/lock.svg"
 import toast from "react-hot-toast"
 
 export const ForgotPassword = () => {
@@ -100,8 +100,8 @@ export const ForgotPassword = () => {
         <p className="font-[500] text-3xl text-center">Forgot Password</p>
 
         <div className="mt-4 flex flex-col gap-6">
-            <div className="shadow-md rounded-2xl p-2 bg-white flex items-center">
-                <div className="w-7">
+            <div className="shadow-md rounded-2xl p-2 bg-white flex items-center gap-2">
+                <div className="w-7 ml-2">
                 <img src={mailPNG} alt="image" 
                     className="w-[100%] h-[100%]"
                 />
@@ -112,8 +112,8 @@ export const ForgotPassword = () => {
             </div>
 
             {isConfirmEmail && (
-              <div className="shadow-md rounded-2xl p-2 bg-white flex items-center">
-                <div className="w-12">
+              <div className="shadow-md rounded-2xl p-1 bg-white flex items-center">
+                <div className="w-14">
                 <img src={lockPNG} alt="image" 
                     className="w-[100%] h-[100%]"
                 />

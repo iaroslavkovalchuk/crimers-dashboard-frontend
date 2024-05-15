@@ -7,11 +7,11 @@ import { LuMessagesSquare, LuPencil } from "react-icons/lu";
 import { IoCloseSharp } from "react-icons/io5";
 import { BsCheckLg } from "react-icons/bs";
 import { combineSlices } from '@reduxjs/toolkit';
-import {getNotifications, setQued, cancelQued, setSent, updateLastMessage, downloadProjectMessage, downloadCustomerMessage, changeCustomerStatus, deleteCustomer, setVariables} from '../../services/notifications'
+import {getNotifications, setQued, cancelQued, setSent, updateLastMessage, downloadProjectMessage, downloadCustomerMessage, changeCustomerStatus, deleteCustomer, setVariables, getTimer, rerunChatGPT, getNewProjects} from '../../services/notifications'
 import moment from 'moment';
 import { DATE_FORMAT } from '../../constants';
 import { useDispatch, useSelector } from 'react-redux';
-import { setData, updateMessageStatus } from '../../store/notificationSlice';
+import { setData, setSendTimer, updateMessageStatus } from '../../store/notificationSlice';
 import { loadingOff, loadingOn } from '../../store/authSlice';
 import logo from "../../assets/logo.svg";
 import messageIcon from "../../assets/message.svg";
@@ -19,16 +19,17 @@ import phoneIcon from "../../assets/phone.svg"
 import { useNavigate } from 'react-router-dom';
 import { EditMessageModal } from '../common/EditMessageModal';
 import { SettingsModal } from '../common/SettingsModal'; // Import the SettingsModal component
+import toast from "react-hot-toast"
 
 
 export const NotificationsTable = () => {
     const [expandId, setExpandId] = useState(null)
     const data = useSelector(state => state.notification.data)
+    const sendTimer = useSelector(state => state.notification.sendTimer)
     const [editMessage, setEditMessage] = useState('')
     const [turnOnEdit, setTurnOnEdit] = useState(null)
-    const [refetch, setRefetch] = useState(false);
+    const [refetch, setRefetch] = useState(false)
     const dispatch = useDispatch()
-    
     // State to manage the visibility and data of the settings modal
     const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false);
     const [settingsData, setSettingsData] = useState({
@@ -38,6 +39,8 @@ export const NotificationsTable = () => {
         twilioAuthToken: '',
         sendgridEmail: '',
         sendgridApiKey: '',
+        prompts: '',
+        timer: '',
     });
 
 
@@ -45,11 +48,12 @@ export const NotificationsTable = () => {
     const navigate = useNavigate()
 
     useEffect(() => {
-        fetchData()
+        fetchData();
     }, [refetch])
 
     useEffect(() => {
         const interval = setInterval(async () => {
+            console.log(sendTimer);
             const now = Date.now();
             const today = new Date();
             let sent_array = [];
@@ -66,7 +70,7 @@ export const NotificationsTable = () => {
                     console.log("qued_time", `${qued_time.getUTCHours()}:${qued_time.getUTCMinutes()}:${qued_time.getUTCSeconds()}`)
                     // console.log(qued_time.getTime());
 
-                    qued_time.setUTCMinutes(qued_time.getUTCMinutes() + 0); // Use UTC methods
+                    qued_time.setUTCMinutes(qued_time.getUTCMinutes() + sendTimer); // Use UTC methods
 
                     // console.log("now", now)
                     console.log("now", `${today.getUTCHours()}:${today.getUTCMinutes()}:${today.getUTCSeconds()}`)
@@ -74,7 +78,7 @@ export const NotificationsTable = () => {
 
                     console.log("difference: ", qued_time.getTime() < today.getTime());
                     
-                    if(childData.message_status == 2 && qued_time.getTime() < today.getTime()) {
+                    if(childData.message_status == 2 && qued_time.getTime() + 5< today.getTime()) {
                         sent_array.push([itemIndex, childIndex, childData.project_id]);
                     }
                     
@@ -112,11 +116,12 @@ export const NotificationsTable = () => {
             clearInterval(interval);
         };
       
-    }, [data, remainTime, updateMessageStatus, dispatch])
+    }, [data, remainTime, updateMessageStatus, sendTimer, , dispatch])
 
     const fetchData = async () => {
         dispatch(loadingOn())
         const res = await getNotifications();
+        const timer = await getTimer();
         dispatch(loadingOff())
 
         if (res.detail === "Could not validate credentials") {
@@ -129,6 +134,8 @@ export const NotificationsTable = () => {
                 dispatch(setData(res))
             }
         }
+
+        dispatch(setSendTimer(timer))
     }
 
     const handleCancelMessage = async () => {
@@ -229,6 +236,55 @@ export const NotificationsTable = () => {
         closeSettingsModal();
     };
 
+    const savePrompts = async (newSettings) => {
+        // Perform validation or API requests here to save the settings
+        console.log('Settings saved:', newSettings);
+        // Update the state with the new settings
+        setSettingsData(newSettings);
+        dispatch(loadingOn());
+        const res = await setVariables(newSettings);
+        dispatch(loadingOff());
+        if (typeof res === 'string') {
+            toast.error(res);
+            return;
+        }
+        if (res) {
+            toast.success("Prompts updated successfully!");
+            return
+        }
+    };
+
+    const handleRerun = async () => {
+        console.log(settingsData.prompts);
+        dispatch(loadingOn());
+        const res = await rerunChatGPT();
+        dispatch(loadingOff());
+        console.log(res);
+        if (typeof res === 'string') {
+            toast.error(res);
+            return;
+        }
+        if (res) {
+            toast.success("Messages updated successfully!");
+            return
+        }
+    }
+
+    const handleUpdateData = async (source) => {
+        dispatch(loadingOn());
+        const res = await getNewProjects(source);
+        dispatch(loadingOff());
+        console.log(res);
+        if (typeof res === 'string') {
+            toast.error(res);
+            return;
+        }
+        if (res) {
+            toast.success("Projects updated successfully!");
+            return
+        }
+    }
+
     return (
         <div>
             <div className="w-[400px] pl-8 pt-8">
@@ -277,8 +333,8 @@ export const NotificationsTable = () => {
                                                     <TbPlus className="text-3xl text-white font-bold cursor-pointer" onClick={() => setExpandId(item.customer_id)}/> }
                                             </td>
                                             <td className="text-lg font-semibold text-white text-center">{!(expandId === item.customer_id) && (item.sent_timestamp ? moment(item.sent_timestamp).format(DATE_FORMAT) : '-')}</td>
-                                            <td className="text-lg font-semibold text-white text-center">{!(expandId === item.customer_id)  && item.lastname}</td>
-                                            <td className="text-lg font-semibold text-white text-center">{!(expandId === item.customer_id)  && item.firstname}</td>
+                                            <td className="text-lg font-semibold text-white text-center">{!(expandId === item.customer_id)  && item.last_name}</td>
+                                            <td className="text-lg font-semibold text-white text-center">{!(expandId === item.customer_id)  && item.first_name}</td>
                                             <td className="text-lg font-semibold text-white text-center">
                                                 {
                                                     !(expandId === item.customer_id)  && (
@@ -324,8 +380,8 @@ export const NotificationsTable = () => {
                                                 <tr key={childData.project_id} className={`bg-white border-t-2 border-t-gray-300 text-center`}>
                                                     <td />
                                                     <td className="text-lg font-semibold py-2">{childData.sent_timestamp ? moment(item.sent_timestamp).format(DATE_FORMAT) : '-'}</td>
-                                                    <td className="text-lg font-semibold">{childData.lastname}</td>
-                                                    <td className="text-lg font-semibold">{childData.firstname}</td>
+                                                    <td className="text-lg font-semibold">{childData.last_name}</td>
+                                                    <td className="text-lg font-semibold">{childData.first_name}</td>
                                                     <td className="text-lg font-semibold">
                                                         {
                                                             <>
@@ -368,7 +424,7 @@ export const NotificationsTable = () => {
                                                                     <div className='flex cursor-pointer'>
                                                                         {
                                                                             (childData.email !== "") && (<>
-                                                                                <img src={messageIcon} alt="logo" style={{width:"30px", height: "30px", marginRight: "-30px"}}/>
+                                                                                <img src={messageIcon} alt="messageIcon" style={{width:"30px", height: "30px", marginRight: "-30px"}}/>
                                                                                 <BsCheckLg className={`text-3xl ${childData.email_sent_success === 1 ? 'text-green-500' : 'text-red-500'} cursor-pointer`} />
                                                                                 <BsCheckLg className={`text-3xl ${childData.email_sent_success === 1 ? 'text-green-500' : 'text-red-500'} cursor-pointer -ml-4`} />
                                                                             </>)
@@ -376,7 +432,7 @@ export const NotificationsTable = () => {
                                                                         
                                                                         {
                                                                             (childData.phone !== "") && (<>
-                                                                                <img src={phoneIcon} alt="logo" style={{width:"30px", height: "30px", marginRight: "-30px"}}/>
+                                                                                <img src={phoneIcon} alt="phoneIcon" style={{width:"30px", height: "30px", marginRight: "-30px"}}/>
                                                                                 <BsCheckLg className={`text-3xl ${childData.phone_sent_success === 1 ? 'text-green-500' : 'text-red-500'} cursor-pointer -ml-1`} />
                                                                                 <BsCheckLg className={`text-3xl ${childData.phone_sent_success === 1 ? 'text-green-500' : 'text-red-500'} cursor-pointer -ml-4 -mr-2`} />
                                                                             </>)
@@ -423,8 +479,11 @@ export const NotificationsTable = () => {
                     <SettingsModal
                         isOpen={isSettingsModalOpen}
                         onSave={saveSettings}
+                        onSavePrompts={savePrompts}
                         onCancel={closeSettingsModal}
                         settings={settingsData}
+                        onRerun={handleRerun}
+                        onUpdateData={handleUpdateData}
                     />
                 </div>
             </div>

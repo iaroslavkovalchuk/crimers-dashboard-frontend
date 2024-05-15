@@ -20,6 +20,25 @@ export const getNotifications = async () => {
     }
 }
 
+export const getTimer = async() =>{
+    try {
+        const token = localStorage.getItem('access_token') || '';
+        const res = await fetch(API+'timer', {
+            headers: {
+                authorization: `Bearer ${token}`
+            }
+        })
+        const json = await res.json();
+        console.log({json})
+        if (json.detail === "Could not validate credentials") {
+            localStorage.removeItem('access_token')
+        }
+        return json;
+    } catch (error) {
+        console.log(error)
+    }
+}
+
 /* ---------------Project--------------- */
 // Set Qued Status for the row
 export const setQued = async (project_id) => {
@@ -155,6 +174,37 @@ export const deleteCustomer = async (customer_id) => {
     try {
         const token = localStorage.getItem('access_token') || '';
         const res = await fetch(API+`delete-customer?customer_id=${customer_id}`, {
+            headers: {
+                authorization: `Bearer ${token}`
+            }
+        })
+        const json = await res.json();
+        return json;
+    } catch (error) {
+        console.log(error)
+    }
+}
+
+// update all last messages
+export const rerunChatGPT = async () => {
+    try {
+        const token = localStorage.getItem('access_token') || '';
+        const res = await fetch(API+`rerun-chatgpt`, {
+            headers: {
+                authorization: `Bearer ${token}`
+            }
+        })
+        const json = await res.json();
+        return json;
+    } catch (error) {
+        console.log(error)
+    }
+}
+
+export const getNewProjects = async (source) => {
+    try {
+        const token = localStorage.getItem('access_token') || '';
+        const res = await fetch(API+`update-db?source=${source}`, {
             headers: {
                 authorization: `Bearer ${token}`
             }
