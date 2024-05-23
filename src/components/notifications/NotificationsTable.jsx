@@ -7,7 +7,8 @@ import { LuMessagesSquare, LuPencil } from "react-icons/lu";
 import { IoCloseSharp } from "react-icons/io5";
 import { BsCheckLg } from "react-icons/bs";
 import { combineSlices } from '@reduxjs/toolkit';
-import {getNotifications, setQued, cancelQued, setSent, updateLastMessage, downloadProjectMessage, downloadCustomerMessage, changeCustomerStatus, deleteCustomer, setVariables, getTimer, rerunChatGPT, getNewProjects} from '../../services/notifications'
+import {getNotifications, setQued, cancelQued, setSent, updateLastMessage, downloadProjectMessage, downloadCustomerMessage, changeCustomerStatus, deleteCustomer, setVariables, getTimer, rerunChatGPT, getNewProjects, sendOptInEmail, getVariables, checkMainTableUpdate} from '../../services/notifications'
+
 import moment from 'moment';
 import { DATE_FORMAT } from '../../constants';
 import { useDispatch, useSelector } from 'react-redux';
@@ -15,7 +16,9 @@ import { setData, setSendTimer, updateMessageStatus } from '../../store/notifica
 import { loadingOff, loadingOn } from '../../store/authSlice';
 import logo from "../../assets/logo.svg";
 import messageIcon from "../../assets/message.svg";
-import phoneIcon from "../../assets/phone.svg"
+import phoneIcon from "../../assets/phone.svg";
+import PhoneOptInIcon from "../../assets/phone-icon.jsx";
+import EmailOptInIcon from "../../assets/email-icon.jsx";
 import { useNavigate } from 'react-router-dom';
 import { EditMessageModal } from '../common/EditMessageModal';
 import { SettingsModal } from '../common/SettingsModal'; // Import the SettingsModal component
@@ -40,26 +43,45 @@ export const NotificationsTable = () => {
         sendgridEmail: '',
         sendgridApiKey: '',
         prompts: '',
-        timer: '',
+        timer: 0,
     });
 
 
     const [remainTime, setRemainTime] = useState([]);
     const navigate = useNavigate()
 
+
+// ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+//                      Handle Get Main Table Data
+
     useEffect(() => {
         fetchData();
-    }, [refetch])
+        getVariables()
+            .then(response => response.json())
+            .then(result => {
+                // console.log("result: ", result);
+                console.log("settingsData: ", settingsData);
+                setSettingsData(result);
+            })
+        
+        // console.log(variables);
+    }, [refetch, setSettingsData])
+
+// -----------------------------------------------------------------------------------------
+    
+
+// ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+//                          Handle Countdown Clock
 
     useEffect(() => {
         const interval = setInterval(async () => {
-            console.log(sendTimer);
+            console.log("send_Timer: ", sendTimer);
             const now = Date.now();
             const today = new Date();
             let sent_array = [];
             const timeArray = data?.map((item, itemIndex) => 
                 item.data?.map((childData, childIndex) => {
-
+                    
                     if(childData.message_status != 2) return "";
 
                     console.log(childData.qued_timestamp);
@@ -116,7 +138,13 @@ export const NotificationsTable = () => {
             clearInterval(interval);
         };
       
-    }, [data, remainTime, updateMessageStatus, sendTimer, , dispatch])
+    }, [data, remainTime, updateMessageStatus, sendTimer, dispatch])
+
+// -----------------------------------------------------------------------------------------
+
+
+// ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+//                          Get All Table Data and Timer Value
 
     const fetchData = async () => {
         dispatch(loadingOn())
@@ -138,10 +166,45 @@ export const NotificationsTable = () => {
         dispatch(setSendTimer(timer))
     }
 
+// ----------------------------------------------------------------------------------------
+
+
+// ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+//                      Real Time Check for Update of Main Table Data
+
+    useEffect(() => {
+        const interval = setInterval(() => {
+            checkMainTableUpdate()
+                .then(response => response.json())
+                .then(result => {
+                    if(result == true){
+                        confirm("Table data updated! Shall you refresh the page?")
+                        setRefetch(!refetch);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                });
+        }, 15000);
+
+        // Cleanup function to clear the interval when the component unmounts
+        return () => clearInterval(interval);
+    }, []); // Empty array ensures the effect runs only once after the initial render
+
+// ----------------------------------------------------------------------------------------
+
+// ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+//                      Cancel Message Editing
+
     const handleCancelMessage = async () => {
         setEditMessage('');
         setTurnOnEdit(null)
     }
+
+// ----------------------------------------------------------------------------------------
+
+
+// ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
     const handlerDownloadProject = async (project_id) => {
         await downloadProjectMessage(project_id)
@@ -153,15 +216,15 @@ export const NotificationsTable = () => {
         let count = 0;
         if(email === ""){
             count += 1;
-            alert("Can't find customer's email address.");
+            toast.error("Can't find customer's email address.");
         }
         if(phone === ""){
             count += 1;
-            alert("Can't find customer's phone number.");
+            toast.error("Can't find customer's phone number.");
         }
 
         if(count == 2){
-            alert("Excuse me, you can't send message to this customer. There is no phone number or email address.");
+            toast.error("Excuse me, you can't send message to this customer. There is no phone number or email address.");
             return;
         }
 
@@ -234,6 +297,7 @@ export const NotificationsTable = () => {
         console.log("settings: ", res);
         // Close the modal
         closeSettingsModal();
+        setRefetch(!refetch);
     };
 
     const savePrompts = async (newSettings) => {
@@ -256,33 +320,44 @@ export const NotificationsTable = () => {
 
     const handleRerun = async () => {
         console.log(settingsData.prompts);
-        dispatch(loadingOn());
+        // dispatch(loadingOn());
+        toast.success("Updating messages started successfully!");
         const res = await rerunChatGPT();
-        dispatch(loadingOff());
+        // dispatch(loadingOff());
         console.log(res);
         if (typeof res === 'string') {
             toast.error(res);
             return;
         }
         if (res) {
-            toast.success("Messages updated successfully!");
             return
         }
     }
 
     const handleUpdateData = async (source) => {
-        dispatch(loadingOn());
+        toast.success("Updating projects started successfully!");
         const res = await getNewProjects(source);
-        dispatch(loadingOff());
         console.log(res);
         if (typeof res === 'string') {
             toast.error(res);
             return;
         }
         if (res) {
-            toast.success("Projects updated successfully!");
             return
         }
+    }
+
+    const handleSendOptInEmail = async(customer_id) => {
+        dispatch(loadingOn());
+        const res = await sendOptInEmail(customer_id, 1);
+        dispatch(loadingOff());
+        setRefetch(!refetch);
+    }
+    const handleUpdateOptInStatus = async(customer_id, opt_in_status) => {
+        dispatch(loadingOn());
+        const res = await sendOptInEmail(customer_id, opt_in_status);
+        dispatch(loadingOff());
+        setRefetch(!refetch);
     }
 
     return (
@@ -346,7 +421,66 @@ export const NotificationsTable = () => {
                                                     )
                                                 }
                                             </td>
-                                            <td className="text-lg font-semibold text-white text-center">{!(expandId === item.customer_id)  && status}</td>
+                                            <td className="text-lg font-semibold text-white text-center">
+                                                {
+                                                    item.opt_in_status == 0 &&
+                                                    (
+                                                        <div
+                                                            className="w-[80%] mx-auto text-center py-1 text-white"
+                                                            style={{ borderRadius: '0.5rem', cursor: 'pointer', display: "flex", justifyContent: "center"}}
+                                                            onClick={() => handleSendOptInEmail(item.customer_id)}
+                                                            >
+                                                            <div className='mx-auto' style={{width:"50px", height: "50px"}}>
+                                                                <PhoneOptInIcon fill="white" />
+                                                            </div>
+                                                            <div className='mx-auto' style={{width:"50px", height: "50px"}}> 
+                                                                <EmailOptInIcon fill="white"/ >
+                                                            </div>
+                                                        </div>
+                                                    )
+                                                }
+                                                {
+                                                    item.opt_in_status == 1 &&
+                                                    (
+                                                        <div
+                                                            className="w-[80%] mx-auto text-center py-1 text-white"
+                                                            style={{ borderRadius: '0.5rem', cursor: 'pointer', display: "flex", justifyContent: "center"}}
+                                                            onClick={() => handleSendOptInEmail(item.customer_id)}
+                                                            >
+                                                            <div className='mx-auto' style={{width:"50px", height: "50px"}}>
+                                                                <PhoneOptInIcon fill="red" />
+                                                            </div>
+                                                            <div className='mx-auto' style={{width:"50px", height: "50px"}}> 
+                                                                <EmailOptInIcon fill="blue"/ >
+                                                            </div>
+                                                        </div>
+                                                    )
+                                                }
+                                                {
+                                                    item.opt_in_status == 2 &&
+                                                    (!(expandId === item.customer_id)  && 
+                                                        <div onDoubleClick={() => handleUpdateOptInStatus(item.customer_id,(item.opt_in_status + 1) % 4)}>
+                                                            {status}
+                                                        </div>
+                                                    )
+                                                    
+                                                    
+                                                }
+                                                {
+                                                    item.opt_in_status == 3 &&
+                                                    (
+                                                        <div
+                                                            className={`w-[80%] mx-auto text-center py-1 bg-red-500 text-white`}
+                                                            style={{borderRadius: "0.5rem"}}
+                                                            onDoubleClick={() => handleUpdateOptInStatus(item.customer_id,(item.opt_in_status + 1) % 4)}
+                                                        >
+                                                            Refused
+                                                        </div>
+                                                    )
+                                                }
+                                            </td>
+
+
                                             <td>
                                                 <div className='flex items-center justify-between'>
                                                     <div>

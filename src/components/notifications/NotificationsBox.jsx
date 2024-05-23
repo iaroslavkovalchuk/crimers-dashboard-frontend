@@ -16,8 +16,12 @@ import { DATE_FORMAT } from '../../constants';
 import { EditMessageModal } from '../common/EditMessageModal';
 import toast from 'react-hot-toast';
 import messageIcon from "../../assets/message.svg";
+import settingsIcon from "../../assets/settings.svg";
 import phoneIcon from "../../assets/phone.svg"
 import logo from "../../assets/logo.svg";
+import { useNavigate } from 'react-router-dom';
+import { SettingsModal } from '../common/SettingsModal'; // Import the SettingsModal component
+
 
 export const NotificationsBox = () => {
     const [expandId, setExpandId] = useState(null)
@@ -28,7 +32,23 @@ export const NotificationsBox = () => {
     const [refetch, setRefetch] = useState(false);
     const dispatch = useDispatch()
     const [remainTime, setRemainTime] = useState([]);
+    const navigate = useNavigate()
 
+
+    const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false);
+    const [settingsData, setSettingsData] = useState({
+        openAIKey: '',
+        twilioPhoneNumber: '',
+        twilioAccountSID: '',
+        twilioAuthToken: '',
+        sendgridEmail: '',
+        sendgridApiKey: '',
+        prompts: '',
+        timer: '',
+    });
+
+
+    
     useEffect(() => {
         fetchData()
     }, [refetch])
@@ -103,13 +123,21 @@ export const NotificationsBox = () => {
     const fetchData = async () => {
         dispatch(loadingOn())
         const res = await getNotifications();
+        const timer = await getTimer();
         dispatch(loadingOff())
+
+        if (res.detail === "Could not validate credentials") {
+            alert('Unauthorized user!');
+            navigate('/signup')
+        }
         
         if (res) {
             if (Array.isArray(res)) {
                 dispatch(setData(res))
             }
         }
+
+        dispatch(setSendTimer(timer))
     }
 
     const handleCancelMessage = async () => {
@@ -136,15 +164,18 @@ export const NotificationsBox = () => {
     }
 
     const handlerSetQued = async (project_id, email, phone) => {
-        if(!email){
-            toast.error("Can't find customer's email address.")
+        let count = 0;
+        if(email === ""){
+            count += 1;
+            toast.error("Can't find customer's email address.");
         }
-        if(!phone){
-            toast.error("Can't find customer's phone number.")
+        if(phone === ""){
+            count += 1;
+            toast.error("Can't find customer's phone number.");
         }
 
-        if(!email && !phone){
-            toast.error("Excuse me, you can't send message to this customer. There is no phone number or email address.")
+        if(count == 2){
+            toast.error("Excuse me, you can't send message to this customer. There is no phone number or email address.");
             return;
         }
 
@@ -183,6 +214,79 @@ export const NotificationsBox = () => {
         setRefetch(!refetch)
     }
 
+     // Function to open the settings modal
+     const openSettingsModal = () => {
+        setIsSettingsModalOpen(true);
+    };
+
+    // Function to close the settings modal
+    const closeSettingsModal = () => {
+        setIsSettingsModalOpen(false);
+    };
+
+    // Function to save settings data
+    const saveSettings = async (newSettings) => {
+        // Perform validation or API requests here to save the settings
+        console.log('Settings saved:', newSettings);
+        // Update the state with the new settings
+        setSettingsData(newSettings);
+
+        const res = await setVariables(newSettings);
+        console.log("settings: ", res);
+        // Close the modal
+        closeSettingsModal();
+    };
+
+    const savePrompts = async (newSettings) => {
+        // Perform validation or API requests here to save the settings
+        console.log('Settings saved:', newSettings);
+        // Update the state with the new settings
+        setSettingsData(newSettings);
+        dispatch(loadingOn());
+        const res = await setVariables(newSettings);
+        dispatch(loadingOff());
+        if (typeof res === 'string') {
+            toast.error(res);
+            return;
+        }
+        if (res) {
+            toast.success("Prompts updated successfully!");
+            return
+        }
+    };
+
+    const handleRerun = async () => {
+        console.log(settingsData.prompts);
+        dispatch(loadingOn());
+        const res = await rerunChatGPT();
+        dispatch(loadingOff());
+        console.log(res);
+        if (typeof res === 'string') {
+            toast.error(res);
+            return;
+        }
+        if (res) {
+            toast.success("Messages updated successfully!");
+            return
+        }
+    }
+
+    const handleUpdateData = async (source) => {
+        dispatch(loadingOn());
+        const res = await getNewProjects(source);
+        dispatch(loadingOff());
+        console.log(res);
+        if (typeof res === 'string') {
+            toast.error(res);
+            return;
+        }
+        if (res) {
+            toast.success("Projects updated successfully!");
+            return
+        }
+    }
+
+
     return (
         <div>
             <div className="w-[300px] pl-8 pt-8">
@@ -195,7 +299,11 @@ export const NotificationsBox = () => {
                 <div className="py-2 px-4 bg-red-700 mb-[1px]">
                     <p className="text-xl text-center font-semibold text-white">NOTIFICATIONS</p>
                 </div>
-
+                <div className="py-1 px-6 bg-green-700 mb-[1px] cursor-pointer" onClick={openSettingsModal}>
+                    <div className="flex justify-center items-center h-full">
+                        <img src={settingsIcon} alt="settingsIcon" className="w-8 h-8"/>
+                    </div>
+                </div>
                 <div>
                     { data.map((item, dataIndex) => {
                         const colors = {};
@@ -335,6 +443,17 @@ export const NotificationsBox = () => {
 
             { turnOnEdit && <EditMessageModal message={editMessage} onSave={handlerUpdateLastMessage} onCancel={handleCancelMessage} /> }
             
+            {/* Settings Modal */}
+            <SettingsModal
+                isOpen={isSettingsModalOpen}
+                onSave={saveSettings}
+                onSavePrompts={savePrompts}
+                onCancel={closeSettingsModal}
+                settings={settingsData}
+                onRerun={handleRerun}
+                onUpdateData={handleUpdateData}
+            />
+
         </div>
     )
 }
