@@ -1,0 +1,29 @@
+.crimer-list {
+    width: 350px;
+    padding: 20px;
+    border-right: 1px solid #ccc;
+    background: #f7f9fc;
+  }
+  
+  
+  .crimer-list-group {
+    max-height: 88vh;
+    overflow-y: auto;
+    padding-right: 20px;
+  }
+  
+  .crimer-list-item {
+    background: #fff;
+    margin-bottom: 10px;
+    padding: 15px;
+    border-radius: 10px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+  
+  .crimer-list-item:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  }
+  
