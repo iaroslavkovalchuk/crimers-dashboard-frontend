@@ -90,7 +90,7 @@ export const ForgotPassword = () => {
 
   return (
     <div className="w-[100%] h-[100vh] flex flex-col gap-6 justify-center items-center bg-cover bg-[url('/bg.png')]">
-      <div className="w-96">
+      <div>
         <img src={logo} alt="logo" 
           className="w-[100%] h-[100%]"
         />

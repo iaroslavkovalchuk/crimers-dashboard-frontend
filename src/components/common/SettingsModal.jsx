@@ -9,7 +9,7 @@ export const SettingsModal = ({ isOpen, onSave, onSavePrompts, onCancel, setting
     const [sendgridApiKey, setSendgridApiKey] = useState(settings.sendgridApiKey || "");
     
     const [prompts, setPrompts] = useState(settings.prompts || "");
-    const [timer, setTimer] = useState(settings.timer || "");
+    const [timer, setTimer] = useState(settings.timer || 0);
     const [editingChatbot, setEditingChatbot] = useState(false);
 
 
@@ -56,7 +56,7 @@ export const SettingsModal = ({ isOpen, onSave, onSavePrompts, onCancel, setting
         setSendgridEmail(settings.sendgridEmail || "");
         setSendgridApiKey(settings.sendgridApiKey || "");
         setPrompts(settings.prompts || "");
-        setTimer(settings.timer || "");
+        setTimer(settings.timer || 0);
     }, [settings])
 
     if (!isOpen) return null;
@@ -199,7 +199,7 @@ export const SettingsModal = ({ isOpen, onSave, onSavePrompts, onCancel, setting
                     <div className="px-4 py-3 bg-gray-50 sm:px-6 sm:flex sm:flex-row-reverse">
                         <button
                             type="button"
-                            className="inline-flex justify-center w-full px-4 py-2 mt-3 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm"
+                            className="inline-flex justify-center w-full px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm"
                             onClick={onCancel}
                         >
                             Cancel

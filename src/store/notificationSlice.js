@@ -11,16 +11,22 @@ const notificationSlice = createSlice({
             const payloadData = action.payload;
             const obj = {}
             console.log("data", state.data);
-
+            
             payloadData.forEach((item) => {
                 if(!obj[item.customer_id]) {
                     obj[item.customer_id] = {
                         ...item,
                         data: [item]
                     }
+                    obj[item.customer_id].review = Number(item.message_status == 1)
+                    obj[item.customer_id].qued = Number(item.message_status == 2)
+                    obj[item.customer_id].sent = Number(item.message_status == 3)
                 } else {
                     const itemData = obj[item.customer_id];
                     itemData.data.push(item);
+                    obj[item.customer_id].review += Number(item.message_status == 1)
+                    obj[item.customer_id].qued += Number(item.message_status == 2)
+                    obj[item.customer_id].sent += Number(item.message_status == 3)
                 }
             })
             state.data = Object.values(obj) || [];

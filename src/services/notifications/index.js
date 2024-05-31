@@ -266,6 +266,20 @@ export const checkMainTableUpdate = async () => {
     }
 }
 
+export const checkScrapingStatus = async () => {
+    try {
+        const token = localStorage.getItem('access_token') || '';
+        return fetch(API + 'check-scraping-status', { // Assuming 'set-variables' is the endpoint for setting variables
+            method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        });
+    } catch (error) {
+        console.error(error);
+        return null; // Return null or handle the error as needed
+    }
+}
 
 export const sendOptInEmail = async (customer_id, opt_in_status_email) => {
     try {

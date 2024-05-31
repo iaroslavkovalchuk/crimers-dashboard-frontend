@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import React, { useState, useEffect} from 'react'
 import { TbPlus, TbMinus } from "react-icons/tb";
 import { IoMdRefresh } from "react-icons/io";
 import { FiDownload, FiMinusCircle } from "react-icons/fi";
@@ -7,7 +7,7 @@ import { LuMessagesSquare, LuPencil } from "react-icons/lu";
 import { IoCloseSharp } from "react-icons/io5";
 import { BsCheckLg } from "react-icons/bs";
 import { combineSlices } from '@reduxjs/toolkit';
-import {getNotifications, setQued, cancelQued, setSent, updateLastMessage, downloadProjectMessage, downloadCustomerMessage, changeCustomerStatus, deleteCustomer, setVariables, getTimer, rerunChatGPT, getNewProjects, sendOptInEmail, getVariables, checkMainTableUpdate} from '../../services/notifications'
+import {getNotifications, setQued, cancelQued, setSent, updateLastMessage, downloadProjectMessage, downloadCustomerMessage, changeCustomerStatus, deleteCustomer, setVariables, getTimer, rerunChatGPT, getNewProjects, sendOptInEmail, sendOptInPhone, getVariables, checkMainTableUpdate, checkScrapingStatus} from '../../services/notifications'
 
 import moment from 'moment';
 import { DATE_FORMAT } from '../../constants';
@@ -17,12 +17,16 @@ import { loadingOff, loadingOn } from '../../store/authSlice';
 import logo from "../../assets/logo.svg";
 import messageIcon from "../../assets/message.svg";
 import phoneIcon from "../../assets/phone.svg";
-import PhoneOptInIcon from "../../assets/phone-icon.jsx";
-import EmailOptInIcon from "../../assets/email-icon.jsx";
+import {PhoneOptInIcon} from "../../assets/phone-icon.jsx";
+import {EmailOptInIcon} from "../../assets/email-icon.jsx";
 import { useNavigate } from 'react-router-dom';
 import { EditMessageModal } from '../common/EditMessageModal';
 import { SettingsModal } from '../common/SettingsModal'; // Import the SettingsModal component
-import toast from "react-hot-toast"
+import toast from "react-hot-toast";
+import {BuildertrendScrapingStatus} from '../common/BuildertrendScrapingStatus.jsx';
+import {XactanalysisScrapingStatus} from '../common/XactanalysisScrapingStatus.jsx';
+import {RerunStatus} from '../common/RerunStatus.jsx';
+import { Tooltip } from 'react-tooltip'
 
 
 export const NotificationsTable = () => {
@@ -32,6 +36,9 @@ export const NotificationsTable = () => {
     const [editMessage, setEditMessage] = useState('')
     const [turnOnEdit, setTurnOnEdit] = useState(null)
     const [refetch, setRefetch] = useState(false)
+    const [startBuildertrend, setStartBuildertrend] = useState(false)
+    const [startXactanalysis, setStartXactanalysis] = useState(false)
+    const [startRerun, setStartRerun] = useState(false)
     const dispatch = useDispatch()
     // State to manage the visibility and data of the settings modal
     const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false);
@@ -45,6 +52,7 @@ export const NotificationsTable = () => {
         prompts: '',
         timer: 0,
     });
+
 
 
     const [remainTime, setRemainTime] = useState([]);
@@ -150,6 +158,7 @@ export const NotificationsTable = () => {
         dispatch(loadingOn())
         const res = await getNotifications();
         const timer = await getTimer();
+        console.log("timer: ", timer);
         dispatch(loadingOff())
 
         if (res.detail === "Could not validate credentials") {
@@ -189,7 +198,7 @@ export const NotificationsTable = () => {
 
         // Cleanup function to clear the interval when the component unmounts
         return () => clearInterval(interval);
-    }, []); // Empty array ensures the effect runs only once after the initial render
+    }, [setRefetch, refetch]); // Empty array ensures the effect runs only once after the initial render
 
 // ----------------------------------------------------------------------------------------
 
@@ -301,9 +310,7 @@ export const NotificationsTable = () => {
     };
 
     const savePrompts = async (newSettings) => {
-        // Perform validation or API requests here to save the settings
-        console.log('Settings saved:', newSettings);
-        // Update the state with the new settings
+        console.log('Settings saved:', newSettings); 
         setSettingsData(newSettings);
         dispatch(loadingOn());
         const res = await setVariables(newSettings);
@@ -318,44 +325,77 @@ export const NotificationsTable = () => {
         }
     };
 
-    const handleRerun = async () => {
-        console.log(settingsData.prompts);
-        // dispatch(loadingOn());
-        toast.success("Updating messages started successfully!");
-        const res = await rerunChatGPT();
-        // dispatch(loadingOff());
-        console.log(res);
-        if (typeof res === 'string') {
-            toast.error(res);
-            return;
-        }
-        if (res) {
-            return
-        }
+    const handleRerun = () => {
+        toast.success("Message updating started successfully!");
+        setStartRerun(true);
+        rerunChatGPT();
+        closeSettingsModal();
+        toast.success("Generating new messages started successfully!");
     }
 
     const handleUpdateData = async (source) => {
+        const response = await checkScrapingStatus();
+        const result = await response.json();
+        console.log("result: ", result)
+        if(source == "BuilderTrend") {
+            if (result.xactanalysis_total != result.xactanalysis_current){
+                toast.success("Please wait until Xactanalysis project updating finished.");
+                return;
+            }
+            setStartBuildertrend(true);
+        }
+        else {
+            if (result.buildertrend_total != result.buildertrend_current) {
+                console.log(result.buildertrend_total,  result.buildertrend_current);
+                toast.success("Please wait until Buildertrend project updating finished.");
+                return;
+
+            }
+            setStartXactanalysis(true);
+        }
         toast.success("Updating projects started successfully!");
-        const res = await getNewProjects(source);
-        console.log(res);
-        if (typeof res === 'string') {
-            toast.error(res);
-            return;
-        }
-        if (res) {
-            return
-        }
+        getNewProjects(source);
+        closeSettingsModal();
     }
 
-    const handleSendOptInEmail = async(customer_id) => {
+    const handleSendOptInEmail = async(customer_id, email) => {
+        if(email === ""){
+            toast.error("Can't find customer's email address.");
+            return
+        }
         dispatch(loadingOn());
         const res = await sendOptInEmail(customer_id, 1);
         dispatch(loadingOff());
         setRefetch(!refetch);
     }
-    const handleUpdateOptInStatus = async(customer_id, opt_in_status) => {
+    const handleUpdateOptInEmailStatus = async(customer_id, opt_in_status, email) => {
+        if(email === ""){
+            toast.error("Can't find customer's email address.");
+            return
+        }
         dispatch(loadingOn());
         const res = await sendOptInEmail(customer_id, opt_in_status);
+        dispatch(loadingOff());
+        setRefetch(!refetch);
+    }
+    const handleSendOptInPhone = async(customer_id, phone) => {
+        if(phone === ""){
+            toast.error("Can't find customer's phone number.");
+            return
+        }
+        dispatch(loadingOn());
+        const res = await sendOptInPhone(customer_id, 1);
+        dispatch(loadingOff());
+        toast.success("Opt In Text Sent Successfully!")
+        setRefetch(!refetch);
+    }
+    const handleUpdateOptInPhoneStatus = async(customer_id, opt_in_status, phone) => {
+        if(phone === ""){
+            toast.error("Can't find customer's phone number.");
+            return
+        }
+        dispatch(loadingOn());
+        const res = await sendOptInPhone(customer_id, opt_in_status);
         dispatch(loadingOff());
         setRefetch(!refetch);
     }
@@ -368,12 +408,36 @@ export const NotificationsTable = () => {
                 />
             </div>
 
-            <div className="pt-16">
-                <div className="py-2 px-4 bg-red-700 inline-block mb-[1px]">
-                    <p className="text-xl font-semibold text-white">NOTIFICATIONS</p>
-                </div>
-                <div className="py-2 px-6 bg-green-700 inline-block mb-[1px] cursor-pointer" style={{"float": "right"}} onClick={openSettingsModal}>
-                    <p className="text-xl font-semibold text-white">SETTINGS</p>
+            <div className="pt-16" >
+                <div style={{display: 'flex', alignItems: 'center', justifyContent: 'space-between'}}>
+
+                    <div id="notification" className="py-2 px-4 bg-red-700 inline-block mb-[1px]">
+                        <p className="text-xl font-semibold text-white"
+                        >NOTIFICATIONS</p>
+                    </div>
+                    <div style={{display: 'flex', alignItems: 'center'}}>
+                        <BuildertrendScrapingStatus 
+                            startBuildertrend={startBuildertrend}
+                            setStartBuildertrend={setStartBuildertrend}
+                            startRun={startRerun}
+                            setStartRerun={setStartRerun}
+                        />
+                        <XactanalysisScrapingStatus 
+                            startXactanalysis={startXactanalysis}
+                            setStartXactanalysis={setStartXactanalysis}
+                            startRun={startRerun}
+                            setStartRerun={setStartRerun}
+                            mode={"web"}
+                        />
+                        <RerunStatus
+                            startRerun={startRerun}
+                            setStartRerun={setStartRerun}
+
+                        />
+                        <div className="py-2 px-6 bg-green-700 inline-block mb-[1px] cursor-pointer" onClick={openSettingsModal}>
+                            <p className="text-xl font-semibold text-white">SETTINGS</p>
+                        </div>
+                    </div>
                 </div>
                 <div>
                     <table className="w-[100%]">
@@ -399,10 +463,10 @@ export const NotificationsTable = () => {
                                 }else if (item.message_status === 3) {
                                     status = 'SENT'
                                 }
-                                
+
                                 return (
-                                    <>
-                                        <tr key={item.customer_id} className={`${expandId === item.customer_id ? "bg-red-700": "bg-gray-400"} border-t-2 border-t-white `}>
+                                    <React.Fragment key={`parent-${item.project_id}`}>
+                                        <tr className={`${expandId === item.customer_id ? "bg-red-700": "bg-gray-400"} border-t-2 border-t-white `}>
                                             <td className="text-center p-2">
                                                 {expandId === item.customer_id ? <TbMinus className="text-3xl text-white font-bold cursor-pointer" onClick={() => setExpandId(null)}/> : 
                                                     <TbPlus className="text-3xl text-white font-bold cursor-pointer" onClick={() => setExpandId(item.customer_id)}/> }
@@ -421,63 +485,112 @@ export const NotificationsTable = () => {
                                                     )
                                                 }
                                             </td>
-                                            <td className="text-lg font-semibold text-white text-center">
+                                            <td className="text-lg font-semibold text-white text-center flex px-6">
                                                 {
-                                                    item.opt_in_status == 0 &&
-                                                    (
+                                                    <>
                                                         <div
-                                                            className="w-[80%] mx-auto text-center py-1 text-white"
+                                                            className="flex w-[80%] mx-auto text-center py-1 text-white"
                                                             style={{ borderRadius: '0.5rem', cursor: 'pointer', display: "flex", justifyContent: "center"}}
-                                                            onClick={() => handleSendOptInEmail(item.customer_id)}
-                                                            >
-                                                            <div className='mx-auto' style={{width:"50px", height: "50px"}}>
-                                                                <PhoneOptInIcon fill="white" />
-                                                            </div>
-                                                            <div className='mx-auto' style={{width:"50px", height: "50px"}}> 
-                                                                <EmailOptInIcon fill="white"/ >
-                                                            </div>
-                                                        </div>
-                                                    )
-                                                }
-                                                {
-                                                    item.opt_in_status == 1 &&
-                                                    (
-                                                        <div
-                                                            className="w-[80%] mx-auto text-center py-1 text-white"
-                                                            style={{ borderRadius: '0.5rem', cursor: 'pointer', display: "flex", justifyContent: "center"}}
-                                                            onClick={() => handleSendOptInEmail(item.customer_id)}
-                                                            >
-                                                            <div className='mx-auto' style={{width:"50px", height: "50px"}}>
-                                                                <PhoneOptInIcon fill="red" />
-                                                            </div>
-                                                            <div className='mx-auto' style={{width:"50px", height: "50px"}}> 
-                                                                <EmailOptInIcon fill="blue"/ >
-                                                            </div>
-                                                        </div>
-                                                    )
-                                                }
-                                                {
-                                                    item.opt_in_status == 2 &&
-                                                    (!(expandId === item.customer_id)  && 
-                                                        <div onDoubleClick={() => handleUpdateOptInStatus(item.customer_id,(item.opt_in_status + 1) % 4)}>
-                                                            {status}
-                                                        </div>
-                                                    )
-                                                    
-                                                    
-                                                }
-                                                {
-                                                    item.opt_in_status == 3 &&
-                                                    (
-                                                        <div
-                                                            className={`w-[80%] mx-auto text-center py-1 bg-red-500 text-white`}
-                                                            style={{borderRadius: "0.5rem"}}
-                                                            onDoubleClick={() => handleUpdateOptInStatus(item.customer_id,(item.opt_in_status + 1) % 4)}
+                                                            data-tooltip-id={`tooltip-email-${item.customer_id}`}
+                                                            data-tooltip-html={`
+                                                                <div>
+                                                                    <span  style="font-weight: bold">Email: </span>
+                                                                    ${item.email ? item.email : "email not found"}
+                                                                </div>
+                                                            `}
+                                                            data-tooltip-delay-show={500}
                                                         >
-                                                            Refused
+                                                            
+                                                            {
+                                                                (!item.opt_in_status_email) && (
+                                                                    <div className='mx-auto' style={{width:"50px", height: "37px"}} onClick={() => handleSendOptInEmail(item.customer_id, item.email)}> 
+                                                                        <EmailOptInIcon />
+                                                                    </div>
+                                                                )
+                                                            }
+                                                            {
+                                                                (item.opt_in_status_email === 1) && (
+                                                                    <div className='mx-auto' style={{width:"50px", height: "37px"}} onDoubleClick={() => handleSendOptInEmail(item.customer_id, item.email)}> 
+                                                                        <EmailOptInIcon fill='#fbf50a'/>
+                                                                    </div>
+                                                                )
+                                                            }
+                                                            {
+                                                                (item.opt_in_status_email === 2) && (
+                                                                    <div className='mx-auto' style={{width:"50px", height: "37px"}}> 
+                                                                        <EmailOptInIcon fill='mediumspringgreen' />
+                                                                    </div>
+                                                                )
+                                                            }
+                                                            {
+                                                                (item.opt_in_status_email === 3) && (
+                                                                    <div className='mx-auto' style={{width:"50px", height: "37px"}} onClick={() => handleUpdateOptInEmailStatus(item.customer_id, 4, item.email)}> 
+                                                                        <EmailOptInIcon fill='orangered' />
+                                                                    </div>
+                                                                )
+                                                            }
+                                                            {
+                                                                (item.opt_in_status_email === 4) && (
+                                                                    <div className='mx-auto' style={{width:"50px", height: "37px"}}> 
+                                                                        <EmailOptInIcon fill='orange' />
+                                                                    </div>
+                                                                )
+                                                            }
                                                         </div>
-                                                    )
+                                                        <Tooltip id={`tooltip-email-${item.customer_id}`} place="bottom" />
+                                                        <div
+                                                            className="w-[80%] mx-auto text-center py-1 text-white"
+                                                            style={{ borderRadius: '0.5rem', cursor: 'pointer', display: "flex", justifyContent: "center"}}
+                                                            data-tooltip-id={`tooltip-phone-${item.customer_id}`}
+                                                            data-tooltip-html={`
+                                                                <div>
+                                                                    <span  style="font-weight: bold">Phone: </span>
+                                                                    ${item.phone ? item.phone: "phone not found"}
+                                                                </div>
+                                                            `}
+                                                            data-tooltip-delay-show={500}
+                                                        >
+                                                            {
+                                                                (!item.opt_in_status_phone) && (
+                                                                    <div className='mx-auto' style={{width:"50px", height: "37px"}} onClick={() => handleSendOptInPhone(item.customer_id, item.phone)}>
+                                                                        <PhoneOptInIcon />
+                                                                        
+                                                                    </div>
+                                                                )
+                                                            }
+                                                            {
+                                                                (item.opt_in_status_phone === 1) && (
+                                                                    <div className='mx-auto' style={{width:"50px", height: "37px"}} onDoubleClick={() => handleSendOptInPhone(item.customer_id, item.phone)}>
+                                                                        <PhoneOptInIcon fill='#fbf50a'/>
+                                                                    </div>
+                                                                )
+                                                            }
+                                                            {
+                                                                (item.opt_in_status_phone === 2) && (
+                                                                    <div className='mx-auto' style={{width:"50px", height: "37px"}}>
+                                                                        <PhoneOptInIcon fill='mediumspringgreen' />
+                                                                    </div>
+                                                                )
+                                                            }
+                                                            {
+                                                                (item.opt_in_status_phone === 3) && (
+                                                                    <div className='mx-auto' style={{width:"50px", height: "37px"}} onClick={() => handleUpdateOptInPhoneStatus(item.customer_id, 4, item.phone)}>
+                                                                        <PhoneOptInIcon fill='orangered' />
+                                                                    </div>
+                                                                )
+                                                            }
+                                                            {
+                                                                (item.opt_in_status_phone === 4) && (
+                                                                    <div className='mx-auto' style={{width:"50px", height: "37px"}}>
+                                                                        <PhoneOptInIcon fill='orange' />
+                                                                    </div>
+                                                                )
+                                                            }
+                                                        </div>
+                                                        <Tooltip id={`tooltip-phone-${item.customer_id}`} place="bottom" />
+                                                    </>
                                                 }
+                                                
                                             </td>
 
 
@@ -487,6 +600,17 @@ export const NotificationsTable = () => {
                                                         <p className="text-lg font-semibold text-white">{}</p>
                                                     </div>
                                                     <div className="flex justify-end mr-3 gap-3 items-center">
+                                                        <div className="flex" style={{gap:"0"}}>
+                                                            <div className={`w-8 h-8 rounded-full flex items-center justify-center`} style={{backgroundColor:"#fbf50a" }}>
+                                                                <span className="text-black text-sm">{item.qued}</span>
+                                                            </div>
+                                                            <div className={`w-8 h-8 rounded-full flex items-center justify-center`} style={{backgroundColor:"orange" , marginLeft:'-9px'}}>
+                                                                <span className="text-white text-sm">{item.review}</span>
+                                                            </div>
+                                                            <div className={`w-8 h-8 rounded-full flex items-center justify-center`} style={{backgroundColor:"mediumspringgreen" , marginLeft:'-9px'}}>
+                                                                <span className="text-white text-sm">{item.sent}</span>
+                                                            </div>
+                                                        </div>
                                                         <LuMessagesSquare className="text-3xl text-white" />
                                                         {/* <IoMdRefresh className={`text-3xl ${expandId === item.project_id? 'text-green-500': 'text-white'}`} /> */}
                                                         {item.sending_method == 2 ? (<IoMdRefresh className="text-3xl text-green-500 cursor-pointer" onClick={() => handlerChangeCustomerStatus(item.customer_id, 1)}/>) : (
@@ -500,7 +624,7 @@ export const NotificationsTable = () => {
                                             </td>
                                         </tr>
 
-                                        {expandId === item.customer_id && item.data.map((childData, childIndex) => {
+                                        {expandId === item.customer_id  && item.data.map((childData, childIndex) => {
                                             let childStatus = 'REVIEW';
                                             if (childData.message_status === 1) {
                                                 childStatus = 'REVIEW'
@@ -511,7 +635,7 @@ export const NotificationsTable = () => {
                                             }
 
                                             return (
-                                                <tr key={childData.project_id} className={`bg-white border-t-2 border-t-gray-300 text-center`}>
+                                                <tr key={`child - ${childData.project_id}`} className={`bg-white border-t-2 border-t-gray-300 text-center`}>
                                                     <td />
                                                     <td className="text-lg font-semibold py-2">{childData.sent_timestamp ? moment(item.sent_timestamp).format(DATE_FORMAT) : '-'}</td>
                                                     <td className="text-lg font-semibold">{childData.last_name}</td>
@@ -545,9 +669,16 @@ export const NotificationsTable = () => {
                                                                         setEditMessage(childData.last_message || '')
                                                                     }}
                                                                 /> }
-                                                                { childStatus === 'REVIEW' && <BsCheckLg className="text-3xl text-gray-400 cursor-pointer" 
-                                                                    onClick={() => handlerSetQued(childData.project_id, childData.email, childData.phone)}
-                                                                /> }
+                                                                { childStatus === 'REVIEW' && 
+                                                                    (
+                                                                        (item.opt_in_status_email ==3 && item.opt_in_status_phone ==3) ? 
+                                                                        <BsCheckLg className="text-3xl text-red-400 cursor-pointer" /> :
+                                                                        <BsCheckLg className="text-3xl text-gray-400 cursor-pointer" 
+                                                                            onClick={() => handlerSetQued(childData.project_id, childData.email, childData.phone)}
+                                                                        />
+                                                                        
+                                                                    )
+                                                                }
                                                                 { childStatus === 'QUED' && (
                                                                     <div className='flex cursor-pointer'>
                                                                         <BsCheckLg className="text-3xl text-gray-400 cursor-pointer" />
@@ -602,7 +733,7 @@ export const NotificationsTable = () => {
                                                 </tr>
                                             )
                                         })}
-                                    </>
+                                    </React.Fragment >
                                 )
                             })}
                         </tbody>
