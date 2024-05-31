@@ -1,5 +1,10 @@
 import { configureStore, createSlice } from "@reduxjs/toolkit";
 
+const verifyString = (str) => {
+    return str === 'n/a' || str === '0' || str === '?' || str === 'N/A';
+}
+
+
 const notificationSlice = createSlice({
     name: 'notification',
     initialState: {
@@ -13,6 +18,12 @@ const notificationSlice = createSlice({
             console.log("data", state.data);
             
             payloadData.forEach((item) => {
+                if(verifyString(item.claim_number)) {
+                    item.claim_number = 'N/A';
+                }
+                if(verifyString(item.project_name)) {
+                    item.project_name = 'N/A';
+                }
                 if(!obj[item.customer_id]) {
                     obj[item.customer_id] = {
                         ...item,

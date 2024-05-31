@@ -442,66 +442,63 @@ export const NotificationsBox = () => {
                                     <div className='flex items-center gap-1' style={{display: 'flex', justifyContent: 'center', alignItems: 'center'}}>
                                         <div
                                             className={`bg-yellow-500 w-7 h-7 rounded-[50%] }`}
-                                            style={{display: 'flex', justifyContent: 'center', alignItems: 'center', fontSize: "12px", marginRight: '-13px'}}
+                                            style={{display: 'flex', justifyContent: 'center', alignItems: 'center', fontSize: "12px"}}
                                         >
                                             <p style={{paddingRight:"5px"}}>{item.review}</p>
                                         </div>
-                                        {expandId !== item.project_id && (
-                                                <>
-                                                    {
-                                                        (item.opt_in_status_email == 0) && ((item.opt_in_status_phone == 0)) && (
-                                                            <>
-                                                                <div
-                                                                    className={`bg-white w-7 h-7 rounded-[50%] }`}
-                                                                    style={{display: 'flex', justifyContent: 'center', alignItems: 'center', fontSize: "12px"}}
-                                                                    onClick={() => handleSendOptIn(item.customer_id, item.email, item.phone)}
-                                                                >
-                                                                    <p>OPT</p>
-                                                                </div>
-                                                            </>
-                                                        )
-                                                    }
-                                                    {
-                                                        ((item.opt_in_status_email == 1 || item.opt_in_status_phone == 1) && item.opt_in_status_email < 2 && item.opt_in_status_phone < 2) && (
-                                                            <div className={`bg-yellow-400 w-7 h-7 rounded-[50%] `} style={{display: 'flex', justifyContent: 'center', alignItems: 'center', fontSize: "12px"}}>
-                                                                <p>OPT</p>
-                                                            </div>
-                                                        )
-                                                    }
-                                                    {
-                                                        ((item.opt_in_status_email == 2 || item.opt_in_status_phone == 2) && item.opt_in_status_email < 3 && item.opt_in_status_phone < 3) && (
-                                                            <div className={`bg-green-400 w-7 h-7 rounded-[50%] `} style={{display: 'flex', justifyContent: 'center', alignItems: 'center', fontSize: "12px"}}>
-                                                                <p>OPT</p>
-                                                            </div>
-                                                        )
-                                                    }
-                                                    {
-                                                        ((item.opt_in_status_email == 3 || item.opt_in_status_phone == 3) && item.opt_in_status_email < 4 && item.opt_in_status_phone < 4) && (
-                                                            <div
-                                                                className={`bg-red-500 w-7 h-7 rounded-[50%] `}
-                                                                style={{display: 'flex', justifyContent: 'center', alignItems: 'center', fontSize: "12px"}}
-                                                                onClick={() => handleUpdateOptInStatus(item.customer_id, 4, item.phone, item.email)}
-                                                            >
-                                                                <p>OPT</p>
-                                                            </div>
-                                                        )
-                                                    }
-                                                    {
-                                                        ((item.opt_in_status_email == 4 || item.opt_in_status_phone == 4)) && (
-                                                            <div
-                                                                className={`bg-orange-500 w-7 h-7 rounded-[50%] `}
-                                                                style={{display: 'flex', justifyContent: 'center', alignItems: 'center', fontSize: "12px"}}
-                                                            >
-                                                                <p>OPT</p>
-                                                            </div>
-                                                        )
-                                                    }
-                                                    {
-                                                        // <div key={color} className={`${color} w-7 h-7 rounded-[50%] ${i !== 0 ? '-ml-4': ''}`} />
-                                                    }
-                                                </>
-                                            )
-                                        }
+                                        <div style={{marginLeft: '-13px'}}>
+                                            {
+                                                (item.opt_in_status_email == 0) && ((item.opt_in_status_phone == 0)) && (
+                                                    <>
+                                                        <div
+                                                            className={`bg-white w-7 h-7 rounded-[50%] }`}
+                                                            style={{display: 'flex', justifyContent: 'center', alignItems: 'center', fontSize: "12px"}}
+                                                            onClick={() => handleSendOptIn(item.customer_id, item.email, item.phone)}
+                                                        >
+                                                            <p>OPT</p>
+                                                        </div>
+                                                    </>
+                                                )
+                                            }
+                                            {
+                                                ((item.opt_in_status_email == 1 || item.opt_in_status_phone == 1) && item.opt_in_status_email < 2 && item.opt_in_status_phone < 2) && (
+                                                    <div className={`bg-yellow-400 w-7 h-7 rounded-[50%] `} style={{display: 'flex', justifyContent: 'center', alignItems: 'center', fontSize: "12px"}}>
+                                                        <p>OPT</p>
+                                                    </div>
+                                                )
+                                            }
+                                            {
+                                                ((item.opt_in_status_email == 2 || item.opt_in_status_phone == 2) && item.opt_in_status_email < 3 && item.opt_in_status_phone < 3) && (
+                                                    <div className={`bg-green-400 w-7 h-7 rounded-[50%] `} style={{display: 'flex', justifyContent: 'center', alignItems: 'center', fontSize: "12px"}}>
+                                                        <p>OPT</p>
+                                                    </div>
+                                                )
+                                            }
+                                            {
+                                                ((item.opt_in_status_email == 3 || item.opt_in_status_phone == 3) && item.opt_in_status_email < 4 && item.opt_in_status_phone < 4) && (
+                                                    <div
+                                                        className={`bg-red-500 w-7 h-7 rounded-[50%] `}
+                                                        style={{display: 'flex', justifyContent: 'center', alignItems: 'center', fontSize: "12px"}}
+                                                        onClick={() => handleUpdateOptInStatus(item.customer_id, 4, item.phone, item.email)}
+                                                    >
+                                                        <p>OPT</p>
+                                                    </div>
+                                                )
+                                            }
+                                            {
+                                                ((item.opt_in_status_email == 4 || item.opt_in_status_phone == 4)) && (
+                                                    <div
+                                                        className={`bg-orange-500 w-7 h-7 rounded-[50%] `}
+                                                        style={{display: 'flex', justifyContent: 'center', alignItems: 'center', fontSize: "12px"}}
+                                                    >
+                                                        <p>OPT</p>
+                                                    </div>
+                                                )
+                                            }
+                                            {
+                                                // <div key={color} className={`${color} w-7 h-7 rounded-[50%] ${i !== 0 ? '-ml-4': ''}`} />
+                                            }
+                                        </div>
 
                                         {item.sending_method == 2 ? (<IoMdRefresh className="text-3xl text-green-500 cursor-pointer" onClick={() => handlerChangeCustomerStatus(item.customer_id, 1)}/>) : (
                                             <IoMdRefresh className="text-3xl text-white cursor-pointer" onClick={() => handlerChangeCustomerStatus(item.customer_id, 2)}/>)}
