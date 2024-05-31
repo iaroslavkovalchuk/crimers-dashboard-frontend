@@ -2,6 +2,20 @@ import React from 'react';
 import { Card, Container, Row, Col } from 'react-bootstrap';
 import './CrimerProfile.css';
 
+const process_image_url = (url) => {
+  if (url.includes('Fugitive/GetImage')) {
+      let parts = url.split('/');
+
+      let lastElement = parts[parts.length - 1];
+
+      console.log(lastElement); // Output: 1084191
+      return process.env.REACT_APP_DATA_HOST + lastElement
+  } else {
+      console.log("URL does not contain 'Fugitive/GetImage'");
+      return url
+  }
+}
+
 const CrimerProfile = ({ crimer }) => {
   return (
     <Container className='profile-container'>
@@ -10,43 +24,47 @@ const CrimerProfile = ({ crimer }) => {
           <Card className='profile-card'>
             <div className='profile-header'>
               <div className='header-image'>
-                { crimer.image_url ? <img src={crimer.image_url} alt='Avatar' className='avatar-img img-thumbnail' /> : null }
+                { crimer.image_url ? <img src={process_image_url(crimer.image_url)} alt='Avatar' className='avatar-img img-thumbnail' /> : null }
                 <div>
-                  <h6>{crimer.suspects_name} {crimer.image_url}</h6>
+                  <h6>{crimer.suspects_name} </h6>
                 </div>
               </div>
             </div>
             <hr />
             <Card.Body className='profile-body' style={{height:"62vh"}}>
-              <div style={{ maxHeight: "20vh", overflow: "auto", border: "1px solid #ccc", padding: "10px", margin: "10px", marginTop: '-5px'}}>
-                <h6 style={{ fontFamily: "Arial, sans-serif", color: "#333", fontWeight: "bold", marginBottom: "8px" }}>
-                  Description
-                </h6>
-                <pre style={{ fontSize: "15px", fontFamily: "'Times New Roman', serif", color: "#555" }}>
-                  {crimer.description}
-                </pre>
-              </div>
-
+              <Row style={{margin: '1px'}}>
+                <Col md={6} style={{ padding: '10px' }}>
+                  <div style={{ overflow: 'auto', border: '1px solid #ccc', padding: '10px', height: '200px' }}>
+                    <h6 style={{ fontFamily: 'Arial, sans-serif', color: '#333', fontWeight: 'bold', marginBottom: '8px' }}>
+                      Description
+                    </h6>
+                    <pre style={{ fontSize: '15px', fontFamily: "'Times New Roman', serif", color: '#555' }}>
+                      {crimer.description}
+                    </pre>
+                  </div>
+                </Col>
+                <Col md={6} style={{ padding: '10px' }}>
+                  <div style={{ overflow: 'auto', border: '1px solid #ccc', padding: '10px', height: '200px' }}>
+                    <h6 style={{ fontFamily: 'Arial, sans-serif', color: '#333', fontWeight: 'bold', marginBottom: '8px' }}>
+                      Suspected Crimes
+                    </h6>
+                    <p style={{ fontFamily: "'Times New Roman', serif", color: '#555' }}>
+                      {crimer.suspected_crimes}
+                    </p>
+                  </div>
+                </Col>
+              </Row>
               <hr />
-              <div style={{ maxHeight: "8vh", overflow: "auto", padding: "10px", margin: "10px", border: "1px solid #ccc" }}>
+              <div style={{ height: "8.5vh", overflow: "auto", padding: "10px", margin: "10px", border: "1px solid #ccc" }}>
                 <h6 style={{ fontFamily: "Arial, sans-serif", color: "#333", fontWeight: "bold", marginBottom: "8px" }}>
-                  Suspected Crimes:
-                </h6>
-                <p style={{ fontFamily: "'Times New Roman', serif", color: "#555" }}>
-                  {crimer.suspected_crimes}
-                </p>
-              </div>
-              <hr />
-              <div style={{ maxHeight: "8vh", overflow: "auto", padding: "10px", margin: "10px", border: "1px solid #ccc" }}>
-                <h6 style={{ fontFamily: "Arial, sans-serif", color: "#333", fontWeight: "bold", marginBottom: "8px" }}>
-                  Possible Location:
+                  Possible Location
                 </h6>
                 <p style={{ fontFamily: "'Times New Roman', serif", color: "#555" }}>
                   {crimer.possible_location}
                 </p>
               </div>
               <hr />
-              <div style={{ maxHeight: "8vh", overflow: "auto", padding: "10px", margin: "10px", border: "1px solid #ccc" }}>
+              <div style={{ height: "12vh", overflow: "auto", padding: "10px", margin: "10px", border: "1px solid #ccc" }}>
                 <h6 style={{ fontFamily: "Arial, sans-serif", color: "#333", fontWeight: "bold", marginBottom: "8px" }}>
                   Agency Text
                 </h6>
@@ -55,7 +73,7 @@ const CrimerProfile = ({ crimer }) => {
                 </p>
               </div>
               <hr />
-              <div style={{ maxHeight: "8vh", overflow: "auto", padding: "10px", margin: "10px", border: "1px solid #ccc" }}>
+              <div style={{ height: "8.5vh", overflow: "auto", padding: "10px", margin: "10px", border: "1px solid #ccc" }}>
                 <h6 style={{ fontFamily: "Arial, sans-serif", color: "#333", fontWeight: "bold", marginBottom: "8px" }}>
                   Reward Amount
                 </h6>
