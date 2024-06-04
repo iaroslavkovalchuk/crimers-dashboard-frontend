@@ -9,6 +9,7 @@
   color: #61dafb;
   font-weight: bold;
   transition: color 0.3s ease-in-out;
+  display: flex;
 }
 
 .brand-logo:hover {
@@ -36,4 +37,14 @@
   width: 200px;
   margin-bottom: unset;
   margin-right: 10px
+}
+
+/* Navbar.css */
+.location-select {
+  width: 100%; /* or any fixed width like 300px */
+}
+
+/* If you're using classNamePrefix, you can target the inner elements like this: */
+.select__control {
+  width: 100%; /* or any fixed width like 300px */
 }

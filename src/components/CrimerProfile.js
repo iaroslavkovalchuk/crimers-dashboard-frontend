@@ -17,6 +17,9 @@ const process_image_url = (url) => {
 }
 
 const CrimerProfile = ({ crimer }) => {
+
+  const description_list = crimer.description.split('\n');
+
   return (
     <Container className='profile-container'>
       <Row className='justify-content-center align-items-center' style={{paddingTop: "35px"}}>
@@ -26,7 +29,7 @@ const CrimerProfile = ({ crimer }) => {
               <div className='header-image'>
                 { crimer.image_url ? <img src={process_image_url(crimer.image_url)} alt='Avatar' className='avatar-img img-thumbnail' /> : null }
                 <div>
-                  <h6>{crimer.suspects_name} </h6>
+                  <h6><a href={crimer.url}> {crimer.suspects_name}  </a></h6>
                 </div>
               </div>
             </div>
@@ -38,9 +41,14 @@ const CrimerProfile = ({ crimer }) => {
                     <h6 style={{ fontFamily: 'Arial, sans-serif', color: '#333', fontWeight: 'bold', marginBottom: '8px' }}>
                       Description
                     </h6>
-                    <pre style={{ fontSize: '15px', fontFamily: "'Times New Roman', serif", color: '#555' }}>
-                      {crimer.description}
-                    </pre>
+                    {
+                      description_list.map((description, index)=>(
+                        <p style={{ fontSize: '15px', fontFamily: "'Times New Roman', serif", color: '#555' }}>
+                          {description}
+                        </p>
+                      ))
+                    }
+                      
                   </div>
                 </Col>
                 <Col md={6} style={{ padding: '10px' }}>

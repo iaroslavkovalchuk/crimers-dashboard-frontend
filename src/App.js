@@ -10,8 +10,8 @@ const App = () => {
   const [crimersData, setCrimersData] = useState([])
   const [selectedCrimer, setSelectedCrimer] = useState();
   const [name, setName] = useState("");
-  const [location, setLocation] = useState("");
-  const [rewardAmount, setRewardAmount] = useState("");
+  const [location, setLocation] = useState();
+  const [rewardAmount, setRewardAmount] = useState();
   
   const handleSearch = () => {
     const data = {
@@ -35,9 +35,9 @@ const App = () => {
   useEffect(() => {
     console.log("ddd")
     const data = {
-      location: "",
+      location: null,
       name: "",
-      rewardAmount: ""
+      rewardAmount: null
     }
     sendRequest('get-crimers', {
       method: 'POST',

@@ -4,7 +4,6 @@ import './CrimerList.css';
 
 const CrimerList = ({ crimers, setSelectedCrimer }) => {
  
-
   return (
     <div className="crimer-list">
       <ListGroup className="crimer-list-group">
