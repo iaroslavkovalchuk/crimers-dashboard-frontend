@@ -4,7 +4,7 @@
     background-position: center;
     height: 95vh;
     max-height: 90vh;
-    overflow: auto;
+    overflow-y: auto;
   }
   
   .profile-card {
@@ -29,7 +29,8 @@
     display: flex;
     flex-direction: column; 
     align-items: center; 
-    justify-content: center; 
+    justify-content: center;
+    overflow-y: auto;
   }
   
   .header-img {
@@ -50,5 +51,9 @@
     background: #fff;
     border-top-left-radius: 15px;
     border-top-right-radius: 15px;
+    overflow-y: auto;
   }
   
+  p, pre, h6 {
+    word-wrap: break-word;
+  }
