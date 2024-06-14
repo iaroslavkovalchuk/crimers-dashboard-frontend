@@ -76,7 +76,7 @@ const DashboardBox = () => {
         </div>
         <div className="flex rounded-3xl" style={{paddingTop: "130px"}}>
             
-            <div className={`absolute z-20 p-5 bg-white rounded-3xl  transition-transform duration-300 ${showCriminalsList ? 'translate-x-0' : '-translate-x-full'}`} >
+            <div className={`absolute z-20 p-5 bg-white rounded-3xl w-[100%] transition-transform duration-300 ${showCriminalsList ? 'translate-x-0' : '-translate-x-full'}`} >
                 <CrimerList crimers={crimersData} setSelectedCrimer={setSelectedCrimer} setShowCriminalsList={setShowCriminalsList} />
             </div>
             <div className="flex-1">

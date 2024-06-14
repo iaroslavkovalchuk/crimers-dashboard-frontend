@@ -100,22 +100,24 @@ const NavbarComponent = ({ name, setName, location, setLocation, rewardAmount, s
               />
               <button
                 onClick={() => {handleSearch(); setIsMenuOpen(!isMenuOpen)}}
-                className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded my-1 w-full lg:w-auto"
+                className="hover:bg-green-700 text-white font-bold py-2 px-4 rounded my-1 w-full lg:w-auto"
+                style={{ transition: "all .15s ease", borderColor: "gray", borderWidth: "1px" }}
+
               >
                 <img src={'search.svg'} alt="image" 
                   className="cursor-pointer mx-auto"
-                  style={{width: "30px", height: "30px"}}
+                  style={{width: "25px", height: "25px"}}
                 />
               </button>
               <button
-                className="bg-gray-400 hover:bg-green-700 text-white font-bold py-2 px-4 rounded my-1 w-full lg:w-auto"
+                className=" hover:bg-green-700 text-white font-bold py-2 px-4 rounded my-1 w-full lg:w-auto"
                 type="button"
                 style={{ transition: "all .15s ease", borderColor: "gray", borderWidth: "1px" }}
                 onClick={handleSignOut}
               >
                 <img src={'signout.svg'} alt="image" 
                   className="cursor-pointer mx-auto"
-                  style={{width: "30px", height: "30px"}}
+                  style={{width: "25px", height: "25px"}}
                 />
               </button>
             </div>
