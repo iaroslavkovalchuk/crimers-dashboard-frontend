@@ -1,0 +1,50 @@
+.custom-navbar {
+  background-color: #282c34;
+  border-radius: 10px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.brand-logo {
+  font-size: 1.5em;
+  color: #61dafb;
+  font-weight: bold;
+  transition: color 0.3s ease-in-out;
+  display: flex;
+}
+
+.brand-logo:hover {
+  color: #21a1f1;
+}
+
+.navbar-toggler {
+  border: none;
+}
+
+.navbar-collapse {
+  justify-content: flex-end;
+}
+
+.search-form {
+  display: flex;
+  align-items: center;
+}
+
+.filter-dropdown {
+  margin-right: 10px;
+}
+
+.search-bar {
+  width: 200px;
+  margin-bottom: unset;
+  margin-right: 10px
+}
+
+/* Navbar.css */
+.location-select {
+  width: 100%; /* or any fixed width like 300px */
+}
+
+/* If you're using classNamePrefix, you can target the inner elements like this: */
+.select__control {
+  width: 100%; /* or any fixed width like 300px */
+}
