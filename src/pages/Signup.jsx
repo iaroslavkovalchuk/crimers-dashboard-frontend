@@ -52,14 +52,13 @@ export const Signup = () => {
   }
 
   return (
-    <div className="w-[100%] h-[100vh] flex flex-col gap-6 justify-center items-center bg-cover bg-[url('/bg.png')]">
-      <div>
-        <img src={logo} alt="logo" 
-          className="w-[100%] h-[100%]"
-        />
+    <div className="w-[100%] h-[100vh] flex flex-col gap-6 justify-center items-center bg-center bg-cover bg-[url('/background.jpg')]" style={{ fontFamily: "math"}}>
+      <div className="flex ">
+        <img src="logoTitle.png" alt="Logo" className="d-flex mr-3" height={"500px"} width={"500px"}/>
+        
       </div>
 
-      <div className="bg-white rounded-3xl w-[90%] p-4 md:w-[60%] md:p-10 lg:w-[35%] lg:p-16">
+      <div className="bg-white rounded-3xl w-[90%] p-4 md:w-[60%] md:p-10 lg:w-[35%] lg:p-16" style={{borderWidth: "thin"}}>
         <p className="font-[500] text-3xl text-center">Sign Up</p>
 
         <div className="mt-4 flex flex-col gap-6">

@@ -11,7 +11,7 @@ export const Layout = () => {
  
   useEffect(() => {
     if (pathname === "/") {
-      navigate('/notifications')
+      navigate('/dashboard')
     }
   }, [])
 

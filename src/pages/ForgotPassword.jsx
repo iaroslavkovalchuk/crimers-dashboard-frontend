@@ -89,14 +89,15 @@ export const ForgotPassword = () => {
   }, [forgotPasswordToken])
 
   return (
-    <div className="w-[100%] h-[100vh] flex flex-col gap-6 justify-center items-center bg-cover bg-[url('/bg.png')]">
-      <div>
-        <img src={logo} alt="logo" 
-          className="w-[100%] h-[100%]"
-        />
+    <div className="w-[100%] h-[100vh] flex flex-col gap-6 justify-center items-center bg-cover bg-[url('/background.jpg')]">
+      <div className="flex ">
+        <img src="logoWhite.png" alt="Logo" className="d-flex mr-3" height={"150px"} width={"150px"}/>
+        <h1 style={{fontSize: "50px", fontFamily: "initial"}}>Flowers <br/>
+           <span style={{marginLeft: "100px"}}> by Irene </span>
+        </h1>
       </div>
 
-      <div className="bg-white rounded-3xl w-[90%] p-4 md:w-[60%] md:p-10 lg:w-[35%] lg:p-16">
+      <div className="bg-white rounded-3xl w-[90%] p-4 md:w-[60%] md:p-10 lg:w-[35%] lg:p-16" style={{borderWidth: "thin"}}>
         <p className="font-[500] text-3xl text-center">Forgot Password</p>
 
         <div className="mt-4 flex flex-col gap-6">

@@ -1,7 +1,7 @@
 import { RouterProvider, createBrowserRouter } from 'react-router-dom'
 import { Signin } from './pages/Signin'
 import { Signup } from './pages/Signup'
-import { Notifications } from './pages/Notifications'
+import { Dashboard } from './pages/Dashboard'
 import { Layout } from './pages/Layout'
 import { ForgotPassword } from './pages/ForgotPassword'
 import { PrivateRouter } from './pages/PrivateRouter'
@@ -24,9 +24,9 @@ const router = createBrowserRouter([
         element: <ForgotPassword />
       },
       {
-        path: '/notifications',
-        element: <PrivateRouter><Notifications /></PrivateRouter>
-      }
+        path: '/dashboard',
+        element: <PrivateRouter><Dashboard /></PrivateRouter>
+      },
     ]
   }
 ])

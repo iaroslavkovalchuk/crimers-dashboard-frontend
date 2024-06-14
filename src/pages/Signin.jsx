@@ -2,9 +2,8 @@ import { Link, useNavigate } from "react-router-dom"
 import { usePassword } from "../hooks/usePassword"
 import { useState } from "react"
 import { useDispatch } from "react-redux"
-import { loadingOff, loadingOn } from "../store/authSlice"
+import { loadingOff, loadingOn, setAuthorized } from "../store/authSlice"
 import { signinUser } from "../services/auth"
-import logo from "../assets/logo.svg"
 import mailPNG from "../assets/email.svg"
 import eyePNG from "../assets/eye.svg"
 import showPNG from "../assets/show.svg"
@@ -47,7 +46,11 @@ export const Signin = () => {
     if (res['access_token']) {
       toast.success("You signed in successfully");
       localStorage.setItem('access_token', res.access_token)
-      navigate('/notifications')
+      console.log(res.user)
+      dispatch(
+        setAuthorized({user: res.user})
+      );
+      navigate('/dashboard')
     }
     else{
       toast.error("Email or Password are incorrect!");
@@ -59,14 +62,11 @@ export const Signin = () => {
   }
 
   return (
-    <div className="w-[100%] h-[100vh] flex flex-col gap-6 justify-center items-center bg-cover bg-[url('/bg.png')]">
-      <div>
-        <img src={logo} alt="logo" 
-          className="w-[100%] h-[100%]"
-        />
+    <div className="w-[100vw] h-[100vh] flex flex-col gap-6 justify-center items-center bg-center bg-cover bg-[url('/background.jpg')]" style={{ fontFamily: "math"}}>
+      <div className="flex ">
+        <img src="logoTitle.png" alt="Logo" className="d-flex mr-3" height={"500px"} width={"500px"}/>
       </div>
-
-      <div className="bg-white rounded-3xl w-[90%] p-4 md:w-[60%] md:p-10 lg:w-[35%] lg:p-16">
+      <div className="bg-white rounded-3xl w-[90%] p-4 md:w-[60%] md:p-10 lg:w-[35%] lg:p-16" style={{borderWidth: "thin"}}>
         <p className="font-[500] text-3xl text-center">Sign In</p>
 
         <div className="mt-4 flex flex-col gap-6">
@@ -106,9 +106,9 @@ export const Signin = () => {
             <input type='checkbox' className="accent-red-500" />
             <p className="text-red-400 text-sm">Remember me</p>
           </div>
-          <div>
+          {/* <div>
             <p className="text-red-400 text-sm cursor-pointer" onClick={handleForgotPassword}>Forgot password?</p>
-          </div>
+          </div> */}
         </div>
 
         <div className="w-[50%] mx-auto mt-6">
