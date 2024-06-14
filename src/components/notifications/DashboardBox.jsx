@@ -31,11 +31,14 @@ const DashboardBox = () => {
     };
     dispatch(loadingOn())
     getCrimers(data)
-    .then(response => response.json())
-    .then(result => {
-        setCrimersData(result);
-    })
-    dispatch(loadingOff())
+      .then(response => response.json())
+      .then(result => {
+          setCrimersData(result);
+      })
+      .finally(() => {
+        dispatch(loadingOff())
+      }
+    )
   };
 
   
@@ -53,8 +56,9 @@ const DashboardBox = () => {
             console.log(result)
             setCrimersData(result);
         })
-        .finally(
-          dispatch(loadingOff())
+        .finally(() => {
+            dispatch(loadingOff())
+          }
         )
     
     

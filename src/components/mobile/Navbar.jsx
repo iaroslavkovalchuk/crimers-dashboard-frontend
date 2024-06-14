@@ -102,7 +102,6 @@ const NavbarComponent = ({ name, setName, location, setLocation, rewardAmount, s
                 onClick={() => {handleSearch(); setIsMenuOpen(!isMenuOpen)}}
                 className="hover:bg-green-700 text-white font-bold py-2 px-4 rounded my-1 w-full lg:w-auto"
                 style={{ transition: "all .15s ease", borderColor: "gray", borderWidth: "1px" }}
-
               >
                 <img src={'search.svg'} alt="image" 
                   className="cursor-pointer mx-auto"
@@ -110,7 +109,7 @@ const NavbarComponent = ({ name, setName, location, setLocation, rewardAmount, s
                 />
               </button>
               <button
-                className=" hover:bg-green-700 text-white font-bold py-2 px-4 rounded my-1 w-full lg:w-auto"
+                className="hover:bg-green-700 text-white font-bold py-2 px-4 rounded my-1 w-full lg:w-auto"
                 type="button"
                 style={{ transition: "all .15s ease", borderColor: "gray", borderWidth: "1px" }}
                 onClick={handleSignOut}
