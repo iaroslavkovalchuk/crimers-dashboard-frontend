@@ -4,7 +4,8 @@ import { Signup } from './pages/Signup'
 import { Dashboard } from './pages/Dashboard'
 import { Layout } from './pages/Layout'
 import { ForgotPassword } from './pages/ForgotPassword'
-import { PrivateRouter } from './pages/PrivateRouter'
+import { PrivateRouter, AdminRouter } from './pages/PrivateRouter'
+import { Admin } from './pages/Admin'
 
 const router = createBrowserRouter([
   {
@@ -19,14 +20,19 @@ const router = createBrowserRouter([
         path: '/signup',
         element: <Signup />
       },
-      {
-        path: '/forgot-password/:forgotPasswordToken?',
-        element: <ForgotPassword />
-      },
+      // {
+      //   path: '/forgot-password/:forgotPasswordToken?',
+      //   element: <ForgotPassword />
+      // },
       {
         path: '/dashboard',
-        element: <PrivateRouter><Dashboard /></PrivateRouter>
+        element: <PrivateRouter> <Dashboard /> </PrivateRouter>
       },
+      {
+        path: '/admin',
+        element: <AdminRouter> <Admin /> </AdminRouter>
+      },
+
     ]
   }
 ])
