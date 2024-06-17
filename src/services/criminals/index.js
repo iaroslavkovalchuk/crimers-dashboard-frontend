@@ -8,6 +8,8 @@ export const getCrimers = async (data) => {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
+                authorization: `Bearer ${token}`
+
             },
             body: JSON.stringify(data),
         })

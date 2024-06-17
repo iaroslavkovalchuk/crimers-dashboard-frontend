@@ -10,7 +10,6 @@ import { Admin } from './pages/Admin'
 import { detectBrowser, getLocation, detectDevice, detectOS } from "./components/common/DeviceDetecter"
 import { UpdateUserStatus } from './services/iptable'
 import { useEffect } from 'react'
-import { useSelector } from 'react-redux'
 
 const router = createBrowserRouter([
   {
@@ -43,10 +42,6 @@ const router = createBrowserRouter([
 ])
 
 function App() {
-
-  
-  const auth = useSelector((state) => state.auth);
-
   useEffect(() => {
     // Detect device type
     const device = detectDevice(navigator);
@@ -62,7 +57,6 @@ function App() {
       const location = await getLocation();
       
       UpdateUserStatus({
-        "email": auth.user.email,
         "device": device,
         "browser": browser,
         "os": os,

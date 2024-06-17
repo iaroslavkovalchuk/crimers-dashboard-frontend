@@ -2,17 +2,14 @@
 import React, { useEffect } from 'react';
 import { useState } from 'react';
 import { getIpTable } from '../../services/iptable';
-import { useSelector } from 'react-redux';
 import 'tailwindcss/tailwind.css';
 
 const AdminTable = () => {
 
     const [data, setData] = useState([]);
 
-    const auth = useSelector((state) => state.auth);
-
     useEffect(() => {
-        getIpTable({"email": auth.user.email})
+        getIpTable()
             .then(response => response.json())
             .then(result => {
                 setData(result)
