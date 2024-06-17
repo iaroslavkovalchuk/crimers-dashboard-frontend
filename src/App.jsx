@@ -7,6 +7,11 @@ import { ForgotPassword } from './pages/ForgotPassword'
 import { PrivateRouter, AdminRouter } from './pages/PrivateRouter'
 import { Admin } from './pages/Admin'
 
+import { detectBrowser, getLocation, detectDevice, detectOS } from "./components/common/DeviceDetecter"
+import { UpdateUserStatus } from './services/iptable'
+import { useEffect } from 'react'
+import { useSelector } from 'react-redux'
+
 const router = createBrowserRouter([
   {
     path: '/',
@@ -38,6 +43,45 @@ const router = createBrowserRouter([
 ])
 
 function App() {
+
+  
+  const auth = useSelector((state) => state.auth);
+
+  useEffect(() => {
+    // Detect device type
+    const device = detectDevice(navigator);
+
+    // Detect browser
+    const browser = detectBrowser(navigator);
+
+    // Detect OS
+    const os = detectOS(navigator);
+
+    // // Get location
+    const updateUserStatus = async () => {
+      const location = await getLocation();
+      
+      UpdateUserStatus({
+        "email": auth.user.email,
+        "device": device,
+        "browser": browser,
+        "os": os,
+        "city": location.city,
+        "country": location.country,
+        "region": location.region,
+        "ipaddress": location.query,
+        "countryCode": location.countryCode
+      })
+        .then(response => response.json())
+        .then(result => {
+          console.log(result);
+        })
+    };
+
+    updateUserStatus();
+    
+
+  }, []);
 
   return (
     <>

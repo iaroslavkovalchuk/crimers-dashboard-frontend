@@ -52,7 +52,7 @@ const AdminTable = () => {
                                 <td className="flex py-3 px-6 text-left items-center">
                                     <img
                                         alt={item.country}
-                                        src={`http://purecatamphetamine.github.io/country-flag-icons/3x2/${item.countryCode}.svg`}
+                                        src={`https://purecatamphetamine.github.io/country-flag-icons/3x2/${item.countryCode}.svg`}
                                         height={"20px"}
                                         width={"20px"}
                                         className="mr-2"

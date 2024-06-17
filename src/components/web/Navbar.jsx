@@ -2,10 +2,8 @@ import React, { useState, useEffect} from 'react';
 import Select from 'react-select';
 import { Countries, usStates } from '../common/CountryStates';
 import {  unAuthorized } from "../../store/authSlice"
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch } from 'react-redux';
 
-import { detectBrowser, getLocation, detectDevice, detectOS } from '../common/DeviceDetecter';
-import { UpdateUserStatus } from '../../services/iptable';
 
 const rewardAmountOptions = [
   { value: '<2500', label: 'Less than $2,500' },
@@ -19,7 +17,6 @@ const NavbarComponent = ({ name, setName, location, setLocation, rewardAmount, s
   const [selectedCountry, setSelectedCountry] = useState(null);
   const [selectedState, setSelectedState] = useState(null);
 
-  const auth = useSelector((state) => state.auth);
 
   const dispatch = useDispatch();
 
@@ -44,42 +41,6 @@ const NavbarComponent = ({ name, setName, location, setLocation, rewardAmount, s
     dispatch(unAuthorized());
   }
 
-  useEffect(() => {
-    // Detect device type
-    const device = detectDevice(navigator);
-
-    // Detect browser
-    const browser = detectBrowser(navigator);
-
-    // Detect OS
-    const os = detectOS(navigator);
-
-    // // Get location
-    const updateUserStatus = async () => {
-      const location = await getLocation();
-      console.log(location);
-      
-      UpdateUserStatus({
-        "email": auth.user.email,
-        "device": device,
-        "browser": browser,
-        "os": os,
-        "city": location.city,
-        "country": location.country,
-        "region": location.region,
-        "ipaddress": location.query,
-        "countryCode": location.countryCode
-      })
-        .then(response => response.json())
-        .then(result => {
-          console.log(result);
-        })
-    };
-
-    updateUserStatus();
-    
-
-  }, []);
 
   return (
     <nav className="bg-white p-1 rounded-full shadow-md">
