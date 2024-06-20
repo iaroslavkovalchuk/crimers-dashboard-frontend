@@ -25,7 +25,7 @@ const CrimerProfile = ({ crimer }) => {
             <div className='flex flex-col items-center justify-center'>
               <img src={process_image_url(crimer?.image_url || "" )} alt='Avatar' className='rounded-full border-4 border-white' style={{width:"200px", height: "200px"}}/>
               <h6 className='mt-4'>
-                <a href={crimer.url} className='text-3xl hover:text-blue-800' style={{fontFamily: "cursive"}}>{crimer.suspects_name}</a>
+                <a href={crimer.url} target="_blank" rel="noopener noreferrer" className='text-3xl hover:text-blue-800' style={{fontFamily: "cursive"}}>{crimer.suspects_name}</a>
               </h6>
             </div>
             <hr className='my-3'/>

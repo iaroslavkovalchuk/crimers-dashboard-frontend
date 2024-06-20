@@ -18,35 +18,38 @@ const AdminTable = () => {
 
     return (
         <div className="container mx-auto p-6">
-            <h1 className="text-4xl font-bold mb-6 text-center" style={{fontFamily: "auto", fontSize: "50px", letterSpacing: "10px"}}>User Status</h1>
+            <div className='flex' style={{marginBottom: "10px"}}>
+                <img src="Favicon.png" alt="Logo" className="ml-auto" height={"90px"} width={"90px"} style={{marginLeft: "200px"}}/>
+                <h1 className="text-4xl font-bold text-center" style={{fontFamily: "auto", fontSize: "55px", letterSpacing: "10px", paddingTop: "20px", marginLeft: "250px"}}>User Status</h1>
+            </div>
             <div className="overflow-x-auto shadow-lg rounded-lg h-screen bg-gray-100">
                 <table className="min-w-full bg-white rounded-lg">
                     <thead>
-                        <tr className="text-white uppercase text-sm leading-normal" style={{backgroundColor: "cadetblue"}}>
-                            <th className="py-3 px-6 text-left">Id</th>
-                            <th className="py-3 px-6 text-left">Email</th>
-                            <th className="py-3 px-6 text-left">IP address</th>
-                            <th className="py-3 px-6 text-left">Device</th>
-                            <th className="py-3 px-6 text-left">Browser</th>
-                            <th className="py-3 px-6 text-left">OS</th>
-                            <th className="py-3 px-6 text-left">Country</th>
-                            <th className="py-3 px-6 text-left">City</th>
-                            <th className="py-3 px-6 text-left">Region</th>
+                        <tr className="text-white uppercase text-sm leading-normal text-center" style={{backgroundColor: "cadetblue"}}>
+                            <th className="py-3 px-6">Id</th>
+                            <th className="py-3 px-6">Email</th>
+                            <th className="py-3 px-6">IP address</th>
+                            <th className="py-3 px-6">Device</th>
+                            <th className="py-3 px-6">Browser</th>
+                            <th className="py-3 px-6">OS</th>
+                            <th className="py-3 px-6">Country</th>
+                            <th className="py-3 px-6">City</th>
+                            <th className="py-3 px-6">Region</th>
                         </tr>
                     </thead>
-                    <tbody className="text-gray-700 text-sm font-light">
+                    <tbody className="text-black text-md text-center">
                         {data.map((item, index) => (
                             <tr
                                 key={index}
                                 className={`border-b border-gray-200 ${index % 2 === 0 ? 'bg-gray-50' : 'bg-white'} hover:bg-indigo-100 transition duration-150 ease-in-out`}
                             >
-                                <td className="py-3 px-6 text-left whitespace-nowrap">{index + 1}</td>
-                                <td className="py-3 px-6 text-left whitespace-nowrap">{item.email}</td>
-                                <td className="py-3 px-6 text-left">{item.ipaddress}</td>
-                                <td className="py-3 px-6 text-left">{item.device}</td>
-                                <td className="py-3 px-6 text-left">{item.browser}</td>
-                                <td className="py-3 px-6 text-left">{item.os}</td>
-                                <td className="flex py-3 px-6 text-left items-center">
+                                <td className="py-3 px-6 whitespace-nowrap">{index + 1}</td>
+                                <td className="py-3 px-6 whitespace-nowrap">{item.email}</td>
+                                <td className="py-3 px-6">{item.ipaddress}</td>
+                                <td className="py-3 px-6">{item.device}</td>
+                                <td className="py-3 px-6">{item.browser}</td>
+                                <td className="py-3 px-6">{item.os}</td>
+                                <td className="flex py-3 px-6 items-center text-center">
                                     <img
                                         alt={item.country}
                                         src={`https://purecatamphetamine.github.io/country-flag-icons/3x2/${item.countryCode}.svg`}
@@ -56,8 +59,8 @@ const AdminTable = () => {
                                     />
                                     {item.country}
                                 </td>
-                                <td className="py-3 px-6 text-left">{item.city}</td>
-                                <td className="py-3 px-6 text-left">{item.region}</td>
+                                <td className="py-3 px-6">{item.city}</td>
+                                <td className="py-3 px-6">{item.region}</td>
                             </tr>
                         ))}
                     </tbody>

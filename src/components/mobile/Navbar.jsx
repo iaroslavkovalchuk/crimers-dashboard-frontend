@@ -48,7 +48,11 @@ const NavbarComponent = ({ name, setName, location, setLocation, rewardAmount, s
       <div className="container mx-auto flex flex-wrap items-center justify-between">
         <div className="flex items-center flex-shrink-0 text-black mr-6">
           <img src="Favicon.png" alt="Logo" className="mr-3" height={"90px"} width={"90px"}/>
-          <span className="font-semibold text-xl tracking-tight">Flowers by Irene</span>
+          <h2 className="text-2xl text-gray-400 font-bold">
+            Flowers
+            <br />
+            <span className="ml-12">by Irene</span>
+          </h2>
         </div>
         <div className="block lg:hidden">
           <button onClick={toggleMenu} className="flex items-center px-3 py-2 border rounded text-teal-200 border-teal-400">
