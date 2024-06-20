@@ -1,5 +1,5 @@
 import AdminTable from "../components/web/AdminTable";
-// import AdminBox from "../components/notifications/DashboardBox";
+import AdminBox from "../components/mobile/AdminBox";
 
 export const Admin = () => {
     
@@ -8,9 +8,9 @@ export const Admin = () => {
             <div className="hidden md:block">
                 <AdminTable />
             </div>
-            {/* <div className="block md:hidden">
+            <div className="block md:hidden">
                 <AdminBox />
-            </div> */}
+            </div>
         </div>
     )
 }
