@@ -11,8 +11,8 @@ export const PrivateRouter = ({children}) => {
 
 export const AdminRouter = ({children}) => {
     const auth = useSelector((state) => state.auth);
-    const admin_email_1 = "vladyslavabramov@outlook.com";
+    const admin_email_1 = "goldrace1123@gmail.com";
     const admin_email_2 = "octothorpe_99@yahoo.com"
     console.log(auth.user.email);
-    return (auth.user.email == admin_email_1 || auth.user == admin_email_2) ? <>{children}</> : <Navigate to="/dashboard" />;
+    return (auth.user.email == admin_email_1 || auth.user.email == admin_email_2) ? <>{children}</> : <Navigate to="/dashboard" />;
 }
